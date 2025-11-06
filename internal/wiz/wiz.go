@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"time"
 )
 
 type Bulb struct {
 	Ip 	 net.IP `json:"ip"`
 	Name string `json:"name"`
+	Mac  string `json:"mac"`
 	Addr *net.UDPAddr `json:"-"`
 }
 
@@ -32,9 +34,15 @@ type WizParams struct {
 	SceneId *int  `json:"sceneId,omitempty"`
 }
 
+type GetPilotParams struct {
+	Result struct{
+		Mac string `json:"mac"`
+	} `json:"result"`
+}
+
 const BulbCacheFile = "bulbs.json"
 
-func DiscoverBulbs(conn *net.UDPConn, cacheMap map[string]*Bulb) []Bulb {
+func DiscoverBulbs(conn *net.UDPConn, cacheMap map[string]*Bulb, nameMap map[string]string) []Bulb {
 	var bulbs []Bulb
 	getPilot := NewGetPilotWizCommand()
 	buffer := make([]byte, 1024)
@@ -42,17 +50,24 @@ func DiscoverBulbs(conn *net.UDPConn, cacheMap map[string]*Bulb) []Bulb {
 	if cacheMap != nil {
 		fmt.Println("Loading cache...")
 		for _, val := range cacheMap {
+			conn.SetReadDeadline(time.Now().Add(2 * time.Second))
 			bulb := Bulb{
 				Ip: 	val.Ip,
 				Name: 	val.Name,
+				Mac: 	val.Mac,
 				Addr: 	&net.UDPAddr{
 					IP: 	val.Ip,
 					Port: 	38899,
 				},
 			}
-			bulb.Execute(conn, getPilot)
+			err := bulb.Execute(conn, getPilot)
+			if err != nil {
+				fmt.Printf("Skipping bulb %s because: %s\n", val.Name, err.Error())
+				continue
+			}
 			n, respAddr, err := conn.ReadFromUDP(buffer)
 			if n == 0 || err != nil {
+				fmt.Printf("Skipping bulb %s because: %s\n", val.Name, err.Error())
 				continue
 			}
 			if respAddr.IP.Equal(bulb.Ip) {
@@ -62,7 +77,7 @@ func DiscoverBulbs(conn *net.UDPConn, cacheMap map[string]*Bulb) []Bulb {
 		fmt.Printf("Loaded %d bulbs from the Cache.\n", len(bulbs))
 		fmt.Println("Discovering additional light bulbs on the network...")
 	} else {
-		fmt.Println("Discovering light bulbs on the network...")
+		fmt.Println("No cahce file found. Discovering light bulbs on the network...")
 	}
 
 	broadcastAddr := &net.UDPAddr{
@@ -72,15 +87,33 @@ func DiscoverBulbs(conn *net.UDPConn, cacheMap map[string]*Bulb) []Bulb {
 	conn.WriteToUDP([]byte(`{"method":"getPilot"}`), broadcastAddr)
 
 	bulbId := 0
-	for n, remoteAddr, err := conn.ReadFromUDP(buffer); n != 0 && err == nil; n, remoteAddr, err = conn.ReadFromUDP(buffer) {
+	var params GetPilotParams
+	for {
+		conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+		n, remoteAddr, err := conn.ReadFromUDP(buffer)
+		if n == 0 || err != nil {
+			break
+		}
+
 		if _, ok := cacheMap[remoteAddr.IP.String()]; ok {
 			continue
 		}
-		bulbs = append(bulbs, Bulb{
-			Ip:   remoteAddr.IP,
-			Name: "WizBulb",
-			Addr: remoteAddr,
-		})
+		json.Unmarshal(buffer[:n], &params)
+		if name, ok := nameMap[params.Result.Mac]; ok {
+			bulbs = append(bulbs, Bulb{
+				Ip:   remoteAddr.IP,
+				Name: name,
+				Mac:  params.Result.Mac,
+				Addr: remoteAddr,
+			})
+		} else {
+			bulbs = append(bulbs, Bulb{
+				Ip:   remoteAddr.IP,
+				Name: "WizBulb",
+				Mac:  params.Result.Mac,
+				Addr: remoteAddr,
+			})
+		}
 		bulbId += 1
 	}
 
