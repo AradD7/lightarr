@@ -1,41 +1,49 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
+	"os"
 	"time"
+
+	"github.com/AradD7/lightarr/internal/wiz"
 )
 
-type Bulb struct {
-	Name string
-	Addr *net.UDPAddr
-}
-
 func main() {
-	var bulbs []Bulb
-
 	conn, _ := net.ListenUDP("udp", &net.UDPAddr{Port: 0})
+	fmt.Printf("Opened a UDP connection on %s\n", conn.LocalAddr().String())
 	defer conn.Close()
-
-	broadcastAddr := &net.UDPAddr{
-		IP: net.IPv4bcast,
-		Port: 38899,
-	}
-
-	conn.WriteToUDP([]byte(`{"method":"getPilot"}`), broadcastAddr)
-
-	buffer := make([]byte, 1024)
 	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
 
-	bulbId := 1
-	for n, remoteAddr, err := conn.ReadFromUDP(buffer); n != 0 && err == nil; n, remoteAddr, err = conn.ReadFromUDP(buffer) {
-		fmt.Println("found a bulb:", remoteAddr.IP, remoteAddr.Port)
-		bulbs = append(bulbs, Bulb{
-			Name: fmt.Sprintf("Bulb%d", bulbId),
-			Addr: remoteAddr,
-		})
-		bulbId += 1
+	bulbs := loadBulbs(conn)
+
+	cmd := wiz.NewSetPilotWizCommand()
+	cmd.TurnOn()
+
+	for _, bulb := range bulbs {
+		bulb.Execute(conn, cmd)
+	}
+	fmt.Println(bulbs)
+}
+
+func loadBulbs(conn *net.UDPConn) []wiz.Bulb {
+	var bulbs []wiz.Bulb
+	cacheMap := make(map[string]*wiz.Bulb)
+
+	data, err := os.ReadFile(wiz.BulbCacheFile)
+	if err != nil {
+		fmt.Printf("Could not open cache file: %s\n", err.Error())
+		return wiz.DiscoverBulbs(conn, nil)
 	}
 
-	fmt.Println(bulbs)
+	if err = json.Unmarshal(data, &bulbs); err != nil {
+		fmt.Printf("Failed to unmarshal the data in cache file: %s\n", err.Error())
+		return wiz.DiscoverBulbs(conn, nil)
+	}
+
+	for _, bulb := range bulbs {
+		cacheMap[bulb.Ip.String()] = &bulb
+	}
+	return wiz.DiscoverBulbs(conn, cacheMap)
 }
