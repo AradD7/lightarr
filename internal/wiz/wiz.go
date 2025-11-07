@@ -42,40 +42,36 @@ type GetPilotParams struct {
 
 const BulbCacheFile = "bulbs.json"
 
-func DiscoverBulbs(conn *net.UDPConn, cacheMap map[string]*Bulb, nameMap map[string]string) []Bulb {
+func LoadBulbs(conn *net.UDPConn) map[string]*Bulb {
 	var bulbs []Bulb
-	getPilot := NewGetPilotWizCommand()
+	bulbsMap := make(map[string]*Bulb)
+
+	data, err := os.ReadFile(BulbCacheFile)
+	if err != nil {
+		fmt.Printf("Could not open cache file: %s\n", err.Error())
+		return UpdateBulbs(conn, bulbsMap)
+	}
+
+	if err = json.Unmarshal(data, &bulbs); err != nil {
+		fmt.Printf("Failed to unmarshal the data in cache file: %s\n", err.Error())
+		return UpdateBulbs(conn, bulbsMap)
+	}
+
+	for _, bulb := range bulbs {
+		bulb.Addr = &net.UDPAddr{
+			IP: 	bulb.Ip,
+			Port: 	38899,
+		}
+		bulbsMap[bulb.Mac] = &bulb
+	}
+	return UpdateBulbs(conn, bulbsMap)
+}
+
+func UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*Bulb) map[string]*Bulb {
 	buffer := make([]byte, 1024)
 
-	if cacheMap != nil {
-		fmt.Println("Loading cache...")
-		for _, val := range cacheMap {
-			conn.SetReadDeadline(time.Now().Add(2 * time.Second))
-			bulb := Bulb{
-				Ip: 	val.Ip,
-				Name: 	val.Name,
-				Mac: 	val.Mac,
-				Addr: 	&net.UDPAddr{
-					IP: 	val.Ip,
-					Port: 	38899,
-				},
-			}
-			err := bulb.Execute(conn, getPilot)
-			if err != nil {
-				fmt.Printf("Skipping bulb %s because: %s\n", val.Name, err.Error())
-				continue
-			}
-			n, respAddr, err := conn.ReadFromUDP(buffer)
-			if n == 0 || err != nil {
-				fmt.Printf("Skipping bulb %s because: %s\n", val.Name, err.Error())
-				continue
-			}
-			if respAddr.IP.Equal(bulb.Ip) {
-				bulbs = append(bulbs, bulb)
-			}
-		}
-		fmt.Printf("Loaded %d bulbs from the Cache.\n", len(bulbs))
-		fmt.Println("Discovering additional light bulbs on the network...")
+	if bulbsMap != nil {
+		fmt.Println("Updating current bulbs and checking for additional light bulbs on the network...")
 	} else {
 		fmt.Println("No cahce file found. Discovering light bulbs on the network...")
 	}
@@ -95,26 +91,24 @@ func DiscoverBulbs(conn *net.UDPConn, cacheMap map[string]*Bulb, nameMap map[str
 			break
 		}
 
-		if _, ok := cacheMap[remoteAddr.IP.String()]; ok {
-			continue
-		}
 		json.Unmarshal(buffer[:n], &params)
-		if name, ok := nameMap[params.Result.Mac]; ok {
-			bulbs = append(bulbs, Bulb{
-				Ip:   remoteAddr.IP,
-				Name: name,
-				Mac:  params.Result.Mac,
-				Addr: remoteAddr,
-			})
+		if cachedBulb, ok := bulbsMap[params.Result.Mac]; ok {
+			if !cachedBulb.Ip.Equal(remoteAddr.IP) {
+				bulbsMap[params.Result.Mac].Addr.IP = remoteAddr.IP
+				bulbsMap[params.Result.Mac].Ip = remoteAddr.IP
+			}
 		} else {
-			bulbs = append(bulbs, Bulb{
-				Ip:   remoteAddr.IP,
-				Name: "WizBulb",
-				Mac:  params.Result.Mac,
-				Addr: remoteAddr,
-			})
+			bulbsMap[params.Result.Mac] = &Bulb{
+				Ip: 	remoteAddr.IP,
+				Name: 	"WizBulb",
+				Mac: 	params.Result.Mac,
+				Addr: 	&net.UDPAddr{
+					IP: 	remoteAddr.IP,
+					Port: 	38899,
+				},
+			}
+			bulbId += 1
 		}
-		bulbId += 1
 	}
 
 	switch bulbId {
@@ -126,17 +120,21 @@ func DiscoverBulbs(conn *net.UDPConn, cacheMap map[string]*Bulb, nameMap map[str
 		fmt.Printf("Found %d new bulbs\n", bulbId)
 	}
 
+	var bulbs []Bulb
+	for _, bulb := range bulbsMap {
+		bulbs = append(bulbs, *bulb)
+	}
 	data, err := json.MarshalIndent(bulbs, "", "   ")
 	if err != nil {
 		fmt.Printf("Failed to marshal bulbs to cache: %s\n", err.Error())
-		return bulbs
-	}
+		return bulbsMap
+}
 	err = os.WriteFile(BulbCacheFile, data, 0644)
 	if err != nil {
 		fmt.Printf("Failed to cache the bulbs: %s\n", err.Error())
 	}
 
-	return bulbs
+	return bulbsMap
 }
 
 func (b *Bulb) Execute(conn *net.UDPConn, cmd WizCommand) error {
