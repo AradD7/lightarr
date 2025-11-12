@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strings"
 	"time"
 )
 
 type Bulb struct {
+	Id 	 string	`json:"id"`
 	Ip 	 net.IP `json:"ip"`
 	Name string `json:"name"`
 	Mac  string `json:"mac"`
@@ -92,13 +94,16 @@ func UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*Bulb) map[string]*Bulb 
 		}
 
 		json.Unmarshal(buffer[:n], &params)
+		bulbStructId := strings.Split(remoteAddr.IP.String(), ".")[3]
 		if cachedBulb, ok := bulbsMap[params.Result.Mac]; ok {
 			if !cachedBulb.Ip.Equal(remoteAddr.IP) {
+				bulbsMap[params.Result.Mac].Id = bulbStructId
 				bulbsMap[params.Result.Mac].Addr.IP = remoteAddr.IP
 				bulbsMap[params.Result.Mac].Ip = remoteAddr.IP
 			}
 		} else {
 			bulbsMap[params.Result.Mac] = &Bulb{
+				Id: 	bulbStructId,
 				Ip: 	remoteAddr.IP,
 				Name: 	"WizBulb",
 				Mac: 	params.Result.Mac,

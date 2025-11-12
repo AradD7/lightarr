@@ -45,9 +45,7 @@ func startRepl(cfg *config) {
 
 
 		if c, ok := getCommands()[userInputSlice[0]]; ok {
-			fmt.Println()
 			err := c.callback(cfg, userInputSlice...)
-			fmt.Println()
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -74,6 +72,11 @@ func getCommands() map[string]cliCommand {
 			name: "bulbs",
 			description: "Prints all the bulbs",
 			callback: commandPrintBulbs,
+		},
+		"turn": {
+			name: "turn on or off",
+			description: "Turns all bulbs on or off",
+			callback: commandTurnBulbs,
 		},
 	}
 }
