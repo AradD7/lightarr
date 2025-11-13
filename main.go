@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net"
+
 	"github.com/AradD7/lightarr/internal/wiz"
 )
 

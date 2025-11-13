@@ -15,7 +15,7 @@ func commandExit(cfg *config, param ...string) error {
 }
 
 func commandHelp(cfg *config, param ...string) error {
-	fmt.Printf("Welcome to the Lightarr!\nUsage:\n\n")
+	fmt.Printf("Welcome to the Lightarr!\n\nUsage:\n\n")
 	for key, value := range getCommands() {
 		fmt.Printf("%s: %s\n", key, value.description)
 	}
