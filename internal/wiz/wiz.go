@@ -6,11 +6,11 @@ import (
 )
 
 type Bulb struct {
-	Id 	 string	`json:"id"`
-	Ip 	 net.IP `json:"ip"`
-	Name string `json:"name"`
-	Mac  string `json:"mac"`
-	Addr *net.UDPAddr `json:"-"`
+	Ip 	 		net.IP 		 `json:"ip"`
+	Name 		string 		 `json:"name"`
+	Mac  		string 		 `json:"mac"`
+	Addr 		*net.UDPAddr `json:"-"`
+	IsReachable bool 		 `json:"isReachable"`
 }
 
 type Color struct {

@@ -18,9 +18,9 @@ type PlexAccount struct {
 }
 
 type PlexPlayer struct {
-	PublicAddr 	string `json:"publicAddress"`
-	Title 		string `json:"title"`
 	Uuid 		string `json:"uuid"`
+	Title 		string `json:"title"`
+	PublicAddr 	string `json:"publicAddress"`
 }
 
 type PlexPayload struct {
@@ -103,9 +103,9 @@ func (cfg *config) triggersRule(payload PlexPayload) []WizAction {
 	return nil
 }
 
-func (cfg *config) getBulbByBulbId(bulbId string) *wiz.Bulb{
+func (cfg *config) getBulbByBulbId(bulbMac string) *wiz.Bulb{
 	for _, bulb := range cfg.bulbsMap {
-		if bulb.Id == bulbId {
+		if bulb.Mac == bulbMac {
 			return bulb
 		}
 	}

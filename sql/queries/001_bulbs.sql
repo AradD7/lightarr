@@ -2,14 +2,15 @@
 SELECT * FROM bulbs;
 --
 
--- name: UpdateBulb :exec
+-- name: UpdateBulbIp :exec
 UPDATE bulbs
 SET ip = ?, updated_at = ?
 WHERE mac = ?;
 
 -- name: AddBulb :one
-INSERT INTO bulbs (mac, created_at, updated_at, ip, name)
+INSERT INTO bulbs (mac, created_at, updated_at, ip, name, is_reachable)
 VALUES (
+    ?,
     ?,
     ?,
     ?,
@@ -17,3 +18,10 @@ VALUES (
     ?
 )
 RETURNING *;
+--
+
+-- name: UpdateBulbName :exec
+UPDATE bulbs
+SET name = ?, updated_at = ?
+WHERE mac = ?;
+--

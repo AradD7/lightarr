@@ -28,13 +28,14 @@ func (cfg *config) LoadBulbs(conn *net.UDPConn) {
 
 	for _, bulb := range data {
 		currentBulb := wiz.Bulb{
-			Mac: 	bulb.Mac,
-			Ip: 	net.ParseIP(bulb.Ip),
-			Name: 	bulb.Name,
-			Addr: 	&net.UDPAddr{
+			Mac: 		 bulb.Mac,
+			Ip: 		 net.ParseIP(bulb.Ip),
+			Name: 		 bulb.Name,
+			Addr: 		 &net.UDPAddr{
 				IP: 	net.ParseIP(bulb.Ip),
 				Port: 	38899,
 			},
+			IsReachable: false,
 		}
 
 		bulbsMap[bulb.Mac] = &currentBulb
@@ -70,10 +71,11 @@ func (cfg *config) UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*wiz.Bulb)
 
 		json.Unmarshal(buffer[:n], &params)
 		if cachedBulb, ok := bulbsMap[params.Result.Mac]; ok {
+			bulbsMap[params.Result.Mac].IsReachable = true
 			if !cachedBulb.Ip.Equal(remoteAddr.IP) {
 				bulbsMap[params.Result.Mac].Addr.IP = remoteAddr.IP
 				bulbsMap[params.Result.Mac].Ip = remoteAddr.IP
-				err := cfg.db.UpdateBulb(context.Background(), database.UpdateBulbParams{
+				err := cfg.db.UpdateBulbIp(context.Background(), database.UpdateBulbIpParams{
 					Mac: 		params.Result.Mac,
 					Ip: 		remoteAddr.IP.String(),
 					UpdatedAt: 	time.Now(),
@@ -85,20 +87,22 @@ func (cfg *config) UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*wiz.Bulb)
 			}
 		} else {
 			bulbsMap[params.Result.Mac] = &wiz.Bulb{
-				Ip: 	remoteAddr.IP,
-				Name: 	"WizBulb",
-				Mac: 	params.Result.Mac,
-				Addr: 	&net.UDPAddr{
+				Ip: 		 remoteAddr.IP,
+				Name: 		 "WizBulb",
+				Mac: 		 params.Result.Mac,
+				Addr: 		 &net.UDPAddr{
 					IP: 	remoteAddr.IP,
 					Port: 	38899,
 				},
+				IsReachable: true,
 			}
 			_, err := cfg.db.AddBulb(context.Background(), database.AddBulbParams{
-				Mac: 		params.Result.Mac,
-				Ip: 		remoteAddr.IP.String(),
-				Name: 		"WizBulb",
-				CreatedAt:  time.Now(),
-				UpdatedAt:  time.Now(),
+				Mac: 		 params.Result.Mac,
+				Ip: 		 remoteAddr.IP.String(),
+				Name: 		 "WizBulb",
+				CreatedAt:   time.Now(),
+				UpdatedAt:   time.Now(),
+				IsReachable: true,
 			})
 			if err != nil {
 				fmt.Printf("Failed to add bulb to DB: %v\n", err.Error())

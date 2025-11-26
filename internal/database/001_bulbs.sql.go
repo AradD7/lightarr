@@ -11,23 +11,25 @@ import (
 )
 
 const addBulb = `-- name: AddBulb :one
-INSERT INTO bulbs (mac, created_at, updated_at, ip, name)
+INSERT INTO bulbs (mac, created_at, updated_at, ip, name, is_reachable)
 VALUES (
+    ?,
     ?,
     ?,
     ?,
     ?,
     ?
 )
-RETURNING mac, created_at, updated_at, ip, name
+RETURNING mac, created_at, updated_at, ip, name, is_reachable
 `
 
 type AddBulbParams struct {
-	Mac       string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Ip        string
-	Name      string
+	Mac         string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	Ip          string
+	Name        string
+	IsReachable bool
 }
 
 func (q *Queries) AddBulb(ctx context.Context, arg AddBulbParams) (Bulb, error) {
@@ -37,6 +39,7 @@ func (q *Queries) AddBulb(ctx context.Context, arg AddBulbParams) (Bulb, error) 
 		arg.UpdatedAt,
 		arg.Ip,
 		arg.Name,
+		arg.IsReachable,
 	)
 	var i Bulb
 	err := row.Scan(
@@ -45,12 +48,13 @@ func (q *Queries) AddBulb(ctx context.Context, arg AddBulbParams) (Bulb, error) 
 		&i.UpdatedAt,
 		&i.Ip,
 		&i.Name,
+		&i.IsReachable,
 	)
 	return i, err
 }
 
 const getAllBulbs = `-- name: GetAllBulbs :many
-SELECT mac, created_at, updated_at, ip, name FROM bulbs
+SELECT mac, created_at, updated_at, ip, name, is_reachable FROM bulbs
 `
 
 func (q *Queries) GetAllBulbs(ctx context.Context) ([]Bulb, error) {
@@ -68,6 +72,7 @@ func (q *Queries) GetAllBulbs(ctx context.Context) ([]Bulb, error) {
 			&i.UpdatedAt,
 			&i.Ip,
 			&i.Name,
+			&i.IsReachable,
 		); err != nil {
 			return nil, err
 		}
@@ -82,20 +87,38 @@ func (q *Queries) GetAllBulbs(ctx context.Context) ([]Bulb, error) {
 	return items, nil
 }
 
-const updateBulb = `-- name: UpdateBulb :exec
+const updateBulbIp = `-- name: UpdateBulbIp :exec
 
 UPDATE bulbs
 SET ip = ?, updated_at = ?
 WHERE mac = ?
 `
 
-type UpdateBulbParams struct {
+type UpdateBulbIpParams struct {
 	Ip        string
 	UpdatedAt time.Time
 	Mac       string
 }
 
-func (q *Queries) UpdateBulb(ctx context.Context, arg UpdateBulbParams) error {
-	_, err := q.db.ExecContext(ctx, updateBulb, arg.Ip, arg.UpdatedAt, arg.Mac)
+func (q *Queries) UpdateBulbIp(ctx context.Context, arg UpdateBulbIpParams) error {
+	_, err := q.db.ExecContext(ctx, updateBulbIp, arg.Ip, arg.UpdatedAt, arg.Mac)
+	return err
+}
+
+const updateBulbName = `-- name: UpdateBulbName :exec
+
+UPDATE bulbs
+SET name = ?, updated_at = ?
+WHERE mac = ?
+`
+
+type UpdateBulbNameParams struct {
+	Name      string
+	UpdatedAt time.Time
+	Mac       string
+}
+
+func (q *Queries) UpdateBulbName(ctx context.Context, arg UpdateBulbNameParams) error {
+	_, err := q.db.ExecContext(ctx, updateBulbName, arg.Name, arg.UpdatedAt, arg.Mac)
 	return err
 }

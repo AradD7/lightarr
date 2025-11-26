@@ -8,10 +8,28 @@ import (
 	"time"
 )
 
+type Account struct {
+	ID    int64
+	Title string
+}
+
 type Bulb struct {
-	Mac       string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Ip        string
-	Name      string
+	Mac         string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	Ip          string
+	Name        string
+	IsReachable bool
+}
+
+type Player struct {
+	Uuid          string
+	Title         string
+	PublicAddress string
+}
+
+type Rule struct {
+	ID        string
+	Condition string
+	Action    string
 }

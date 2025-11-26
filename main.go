@@ -60,6 +60,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /api/bulbs", config.handlerGetBulbs)
+	mux.HandleFunc("POST /api/bulbs/updatename", config.handlerUpdateBulbName)
 
 	srv := &http.Server {
 		Handler: mux,
