@@ -44,7 +44,6 @@ func main() {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}
 
-
 	conn, _ := net.ListenUDP("udp", &net.UDPAddr{Port: 0})
 	fmt.Printf("Opened a UDP connection on %s\n", conn.LocalAddr().String())
 	defer conn.Close()
@@ -61,6 +60,17 @@ func main() {
 
 	mux.HandleFunc("GET /api/bulbs", config.handlerGetBulbs)
 	mux.HandleFunc("POST /api/bulbs/updatename", config.handlerUpdateBulbName)
+
+	mux.HandleFunc("GET /api/accounts", config.handlerGetAllAccounts)
+	mux.HandleFunc("GET /api/devices", config.handlerGetAllPlayers)
+	mux.HandleFunc("POST /api/accounts", config.handlerAddAccounts)
+	mux.HandleFunc("POST /api/devices", config.handlerAddDevices)
+	mux.HandleFunc("DELETE /api/accounts/{accountId}", config.handlerDeleteAccount)
+	mux.HandleFunc("DELETE /api/devices/{deviceId}", config.handlerDeleteDevice)
+
+	mux.HandleFunc("GET /api/rules", config.handlerGetAllRules)
+	mux.HandleFunc("POST /api/rules", config.handlerAddRule)
+	mux.HandleFunc("DELETE /api/rules/{ruleId}", config.handlerDeleteRule)
 
 	srv := &http.Server {
 		Handler: mux,

@@ -1,3 +1,11 @@
+-- name: GetAllAccounts :many
+SELECT * FROM accounts;
+--
+
+-- name: GetAllPlayers :many
+SELECT * FROM players;
+--
+
 -- name: AddPlexPlayer :one
 INSERT INTO players (uuid, title, public_address)
 VALUES (

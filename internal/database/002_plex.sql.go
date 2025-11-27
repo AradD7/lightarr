@@ -32,6 +32,7 @@ func (q *Queries) AddPlexAccount(ctx context.Context, arg AddPlexAccountParams) 
 }
 
 const addPlexPlayer = `-- name: AddPlexPlayer :one
+
 INSERT INTO players (uuid, title, public_address)
 VALUES (
     ?,
@@ -74,4 +75,59 @@ WHERE uuid = ?
 func (q *Queries) DeletePlayer(ctx context.Context, uuid string) error {
 	_, err := q.db.ExecContext(ctx, deletePlayer, uuid)
 	return err
+}
+
+const getAllAccounts = `-- name: GetAllAccounts :many
+SELECT id, title FROM accounts
+`
+
+func (q *Queries) GetAllAccounts(ctx context.Context) ([]Account, error) {
+	rows, err := q.db.QueryContext(ctx, getAllAccounts)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Account
+	for rows.Next() {
+		var i Account
+		if err := rows.Scan(&i.ID, &i.Title); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAllPlayers = `-- name: GetAllPlayers :many
+
+SELECT uuid, title, public_address FROM players
+`
+
+func (q *Queries) GetAllPlayers(ctx context.Context) ([]Player, error) {
+	rows, err := q.db.QueryContext(ctx, getAllPlayers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Player
+	for rows.Next() {
+		var i Player
+		if err := rows.Scan(&i.Uuid, &i.Title, &i.PublicAddress); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
