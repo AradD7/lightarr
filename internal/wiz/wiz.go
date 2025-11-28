@@ -3,6 +3,7 @@ package wiz
 import (
 	"encoding/json"
 	"net"
+	"time"
 )
 
 type Bulb struct {
@@ -32,6 +33,46 @@ type WizParams struct {
 	SceneId *int  `json:"sceneId,omitempty"`
 }
 
+func (b *Bulb) drainBuffer(conn *net.UDPConn) {
+    conn.SetReadDeadline(time.Now().Add(10 * time.Millisecond))
+    buf := make([]byte, 1024)
+    for {
+        _, _, err := conn.ReadFromUDP(buf)
+        if err != nil {
+            break
+        }
+    }
+}
+
+func (b *Bulb) Flash(conn *net.UDPConn) {
+	type parameters struct {
+		Result struct {
+			Dimming int `json:"dimming"`
+		} `json:"result"`
+	}
+	var params parameters
+	buffer := make([]byte, 1024)
+	b.drainBuffer(conn)
+	getPilot := NewGetPilotWizCommand()
+	b.Execute(conn, getPilot)
+	conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+	n, _, _ := conn.ReadFromUDP(buffer)
+	json.Unmarshal(buffer[:n], &params)
+
+	flashCmd := NewSetPilotWizCommand()
+	flashCmd.SetDim(0)
+	b.Execute(conn, flashCmd)
+	time.Sleep(800 * time.Millisecond)
+	flashCmd.SetDim(100)
+	b.Execute(conn, flashCmd)
+	time.Sleep(800 * time.Millisecond)
+	flashCmd.SetDim(0)
+	b.Execute(conn, flashCmd)
+	time.Sleep(800 * time.Millisecond)
+	flashCmd.SetDim(params.Result.Dimming)
+	b.Execute(conn, flashCmd)
+
+}
 func (b *Bulb) Execute(conn *net.UDPConn, cmd WizCommand) error {
 	data, err := json.Marshal(cmd)
 	if err != nil {

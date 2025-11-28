@@ -111,3 +111,38 @@ func (cfg *config) handlerDeletePlayer(w http.ResponseWriter, r *http.Request) {
 	}
 	respondWithJSON(w, http.StatusOK, "Deleted!")
 }
+
+func (cfg *config) handlerPlexWebhook(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseMultipartForm(10 << 20)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Failed to parse form", err)
+		return
+	}
+
+	payload := r.FormValue("payload")
+	if payload == "" {
+		respondWithError(w, http.StatusBadRequest, "No payload found", nil)
+		return
+	}
+
+	var params PlexPayload
+	if err := json.Unmarshal([]byte(payload), &params); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Failed to decode JSON", err)
+		return
+	}
+
+	action, ruleId := cfg.triggersRule(params)
+	if action == nil {
+		return
+	}
+	cfg.executeActions(action)
+	fmt.Printf("Rule %s was triggered\n", ruleId)
+}
+
+func (cfg *config) handlerPlexAllAccounts(w http.ResponseWriter, r *http.Request) {
+	//todo
+}
+
+func (cfg *config) handlerPlexAllPlayers(w http.ResponseWriter, r *http.Request) {
+	//todo
+}

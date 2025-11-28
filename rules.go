@@ -11,8 +11,6 @@ import (
 	"github.com/google/uuid"
 )
 
-const rulesCache = "rules.json"
-
 type PlexAccount struct {
 	Id		int 	`json:"id"`
 	Title	string 	`json:"title"`
@@ -48,6 +46,7 @@ type Rule struct {
 }
 
 func (cfg *config) loadRules() error {
+	fmt.Println("Loading rules...")
 	rules, err := cfg.db.GetAllRules(context.Background())
 	if err != nil {
 		return err
@@ -70,7 +69,11 @@ func (cfg *config) loadRules() error {
 			Action: 	tempWizAction,
 		})
 	}
-
+	if len(cfg.rules) == 0 {
+		fmt.Println("No rules in db")
+	} else {
+		fmt.Println("Rules loaded!")
+	}
 	return nil
 }
 
@@ -113,17 +116,17 @@ func (cfg *config) deleteRule(id string) error {
 	return fmt.Errorf("Failed to fund rule with id %s", id)
 }
 
-func (cfg *config) triggersRule(payload PlexPayload) []WizAction {
+func (cfg *config) triggersRule(payload PlexPayload) ([]WizAction, string) {
 	for _, rule := range cfg.rules {
 		if slices.Contains(rule.Condition.Event, payload.Event) {
 			if slices.Contains(rule.Condition.Player, payload.Player) || len(rule.Condition.Player) == 0 {
 				if slices.Contains(rule.Condition.Account, payload.Account) || len(rule.Condition.Account) == 0 {
-					return rule.Action
+					return rule.Action, rule.Id
 				}
 			}
 		}
 	}
-	return nil
+	return nil, ""
 }
 
 func (cfg *config) getBulbByBulbMac(bulbMac string) *wiz.Bulb{

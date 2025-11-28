@@ -40,3 +40,24 @@ func (cfg *config) handlerUpdateBulbName(w http.ResponseWriter, r *http.Request)
 
 	respondWithJSON(w, http.StatusOK, "Updated!")
 }
+
+func (cfg *config) handlerFlashBulb(w http.ResponseWriter, r *http.Request) {
+	type parameters struct {
+		Mac  string `json:"mac"`
+	}
+
+	var params parameters
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&params); err != nil {
+		respondWithError(w, http.StatusBadRequest, "failed to read json data", err)
+		return
+	}
+
+	bulb, ok := cfg.bulbsMap[params.Mac]
+	if !ok {
+		respondWithError(w, http.StatusBadRequest, "Invalid Mac", nil)
+		return
+	}
+
+	go bulb.Flash(cfg.conn)
+}
