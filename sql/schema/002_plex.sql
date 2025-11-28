@@ -1,13 +1,14 @@
 -- +goose Up
 CREATE TABLE players (
-    uuid            TEXT PRIMARY KEY,
-    title           TEXT NOT NULL,
-    public_address  TEXT NOT NULL
+    id          INTEGER PRIMARY KEY,
+    name        TEXT NOT NULL,
+    last_seen   TEXT NOT NULL
 );
 
 CREATE TABLE accounts (
     id      INTEGER PRIMARY KEY,
-    title   TEXT NOT NULL
+    title   TEXT NOT NULL,
+    thumb   TEXT
 );
 -- +goose Down
 DROP TABLE players;

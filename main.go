@@ -17,10 +17,12 @@ import (
 )
 
 type config struct {
-	db 			*database.Queries
-	conn 		*net.UDPConn
-	bulbsMap	map[string]*wiz.Bulb
-	rules 		[]Rule
+	db 			 *database.Queries
+	conn 		 *net.UDPConn
+	bulbsMap	 map[string]*wiz.Bulb
+	rules 		 []Rule
+	plexToken 	 string
+	plexClientId string
 }
 
 //go:embed sql/schema/*.sql
@@ -30,6 +32,8 @@ func main() {
 	godotenv.Load()
 	port := os.Getenv("PORT")
 	dbPath := os.Getenv("DB_PATH")
+	xPlexToken := os.Getenv("X_PLEX_TOKEN")
+	xClientId := os.Getenv("X_PLEX_CLIENT_IDENTIFIER")
 
 	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
@@ -50,8 +54,10 @@ func main() {
 
 
 	config := config{
-		db: 		database.New(db),
-		conn: 		conn,
+		db: 			database.New(db),
+		conn: 			conn,
+		plexToken:  	xPlexToken,
+		plexClientId: 	xClientId,
 	}
 	config.LoadBulbs(conn)
 	err = config.loadRules()

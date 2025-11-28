@@ -7,51 +7,54 @@ package database
 
 import (
 	"context"
+	"database/sql"
 )
 
 const addPlexAccount = `-- name: AddPlexAccount :one
 
-INSERT INTO accounts (id, title)
+INSERT INTO accounts (id, title, thumb)
 VALUES (
+    ?,
     ?,
     ?
 )
-RETURNING id, title
+RETURNING id, title, thumb
 `
 
 type AddPlexAccountParams struct {
 	ID    int64
 	Title string
+	Thumb sql.NullString
 }
 
 func (q *Queries) AddPlexAccount(ctx context.Context, arg AddPlexAccountParams) (Account, error) {
-	row := q.db.QueryRowContext(ctx, addPlexAccount, arg.ID, arg.Title)
+	row := q.db.QueryRowContext(ctx, addPlexAccount, arg.ID, arg.Title, arg.Thumb)
 	var i Account
-	err := row.Scan(&i.ID, &i.Title)
+	err := row.Scan(&i.ID, &i.Title, &i.Thumb)
 	return i, err
 }
 
 const addPlexPlayer = `-- name: AddPlexPlayer :one
 
-INSERT INTO players (uuid, title, public_address)
+INSERT INTO players (id, name, last_seen)
 VALUES (
     ?,
     ?,
     ?
 )
-RETURNING uuid, title, public_address
+RETURNING id, name, last_seen
 `
 
 type AddPlexPlayerParams struct {
-	Uuid          string
-	Title         string
-	PublicAddress string
+	ID       int64
+	Name     string
+	LastSeen string
 }
 
 func (q *Queries) AddPlexPlayer(ctx context.Context, arg AddPlexPlayerParams) (Player, error) {
-	row := q.db.QueryRowContext(ctx, addPlexPlayer, arg.Uuid, arg.Title, arg.PublicAddress)
+	row := q.db.QueryRowContext(ctx, addPlexPlayer, arg.ID, arg.Name, arg.LastSeen)
 	var i Player
-	err := row.Scan(&i.Uuid, &i.Title, &i.PublicAddress)
+	err := row.Scan(&i.ID, &i.Name, &i.LastSeen)
 	return i, err
 }
 
@@ -69,16 +72,16 @@ func (q *Queries) DeleteAccount(ctx context.Context, id int64) error {
 const deletePlayer = `-- name: DeletePlayer :exec
 
 DELETE FROM players
-WHERE uuid = ?
+WHERE id = ?
 `
 
-func (q *Queries) DeletePlayer(ctx context.Context, uuid string) error {
-	_, err := q.db.ExecContext(ctx, deletePlayer, uuid)
+func (q *Queries) DeletePlayer(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deletePlayer, id)
 	return err
 }
 
 const getAllAccounts = `-- name: GetAllAccounts :many
-SELECT id, title FROM accounts
+SELECT id, title, thumb FROM accounts
 `
 
 func (q *Queries) GetAllAccounts(ctx context.Context) ([]Account, error) {
@@ -90,7 +93,7 @@ func (q *Queries) GetAllAccounts(ctx context.Context) ([]Account, error) {
 	var items []Account
 	for rows.Next() {
 		var i Account
-		if err := rows.Scan(&i.ID, &i.Title); err != nil {
+		if err := rows.Scan(&i.ID, &i.Title, &i.Thumb); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -106,7 +109,7 @@ func (q *Queries) GetAllAccounts(ctx context.Context) ([]Account, error) {
 
 const getAllPlayers = `-- name: GetAllPlayers :many
 
-SELECT uuid, title, public_address FROM players
+SELECT id, name, last_seen FROM players
 `
 
 func (q *Queries) GetAllPlayers(ctx context.Context) ([]Player, error) {
@@ -118,7 +121,7 @@ func (q *Queries) GetAllPlayers(ctx context.Context) ([]Player, error) {
 	var items []Player
 	for rows.Next() {
 		var i Player
-		if err := rows.Scan(&i.Uuid, &i.Title, &i.PublicAddress); err != nil {
+		if err := rows.Scan(&i.ID, &i.Name, &i.LastSeen); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

@@ -7,7 +7,7 @@ SELECT * FROM players;
 --
 
 -- name: AddPlexPlayer :one
-INSERT INTO players (uuid, title, public_address)
+INSERT INTO players (id, name, last_seen)
 VALUES (
     ?,
     ?,
@@ -17,8 +17,9 @@ RETURNING *;
 --
 
 -- name: AddPlexAccount :one
-INSERT INTO accounts (id, title)
+INSERT INTO accounts (id, title, thumb)
 VALUES (
+    ?,
     ?,
     ?
 )
@@ -27,7 +28,7 @@ RETURNING *;
 
 -- name: DeletePlayer :exec
 DELETE FROM players
-WHERE uuid = ?;
+WHERE id = ?;
 --
 
 -- name: DeleteAccount :exec

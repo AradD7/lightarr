@@ -1,7 +1,9 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -18,8 +20,9 @@ func (cfg *config) handlerGetAllAccounts(w http.ResponseWriter, r *http.Request)
 	var resp []PlexAccount
 	for _, acc := range accounts {
 		resp = append(resp, PlexAccount{
-			Id: 	int(acc.ID),
-			Title:  acc.Title,
+			Id: 		int(acc.ID),
+			Title:  	acc.Title,
+			Thumbnail:  acc.Thumb.String,
 		})
 	}
 	respondWithJSON(w, http.StatusOK, resp)
@@ -34,9 +37,9 @@ func (cfg *config) handlerGetAllPlayers(w http.ResponseWriter, r *http.Request) 
 	var resp []PlexPlayer
 	for _, player := range players {
 		resp = append(resp, PlexPlayer{
-			Uuid: 		player.Uuid,
-			Title:  	player.Title,
-			PublicAddr: player.PublicAddress,
+			Id: 	  int(player.ID),
+			Name:  	  player.Name,
+			LastSeen: player.LastSeen,
 		})
 	}
 	respondWithJSON(w, http.StatusOK, resp)
@@ -55,6 +58,10 @@ func (cfg *config) handlerAddAccounts(w http.ResponseWriter, r *http.Request) {
 		if _, err := cfg.db.AddPlexAccount(r.Context(), database.AddPlexAccountParams{
 			ID: 	int64(account.Id),
 			Title:  account.Title,
+			Thumb:  sql.NullString{
+				Valid: true,
+				String: account.Thumbnail,
+			},
 		}); err != nil {
 			addedAccounts -= 1
 		}
@@ -74,9 +81,9 @@ func (cfg *config) handlerAddPlayers(w http.ResponseWriter, r *http.Request) {
 	addedPlayers := 0
 	for _, player := range players {
 		if _, err := cfg.db.AddPlexPlayer(r.Context(), database.AddPlexPlayerParams{
-			Uuid:  			player.Uuid,
-			Title: 			player.Title,
-			PublicAddress:  player.PublicAddr,
+			ID:  		int64(player.Id),
+			Name: 		player.Name,
+			LastSeen:   player.LastSeen,
 		}); err != nil {
 			addedPlayers -= 1
 		}
@@ -140,9 +147,72 @@ func (cfg *config) handlerPlexWebhook(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cfg *config) handlerPlexAllAccounts(w http.ResponseWriter, r *http.Request) {
-	//todo
+	req, err := http.NewRequest("GET", "https://clients.plex.tv/api/home/users", nil)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to create a GET request", err)
+		return
+	}
+	req.Header.Set("X-Plex-Token", cfg.plexToken)
+	req.Header.Set("X-Plex-Client-Identifier", cfg.plexClientId)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "GET request failed", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	type User struct {
+		Id 		string `xml:"id,attr"`
+		Title	string `xml:"title,attr"`
+		Thumb	string `xml:"thumb,attr"`
+	}
+	type result struct {
+		XMLName xml.Name `xml:"MediaContainer"`
+		Users []User	 `xml:"User"`
+	}
+	var res result
+	decoder := xml.NewDecoder(resp.Body)
+	err = decoder.Decode(&res)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to decode the XML response", err)
+		return
+	}
+
+	var accounts []PlexAccount
+	for _, user := range res.Users {
+		userId, _ := strconv.Atoi(user.Id)
+		accounts = append(accounts, PlexAccount{
+			Id: 		userId,
+			Title:  	user.Title,
+			Thumbnail:  user.Thumb,
+		})
+	}
+	respondWithJSON(w, http.StatusOK, accounts)
 }
 
 func (cfg *config) handlerPlexAllPlayers(w http.ResponseWriter, r *http.Request) {
-	//todo
+	req, err := http.NewRequest("GET", "https://clients.plex.tv/devices", nil)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to create a GET request", err)
+		return
+	}
+	req.Header.Set("X-Plex-Token", cfg.plexToken)
+	req.Header.Set("X-Plex-Client-Identifier", cfg.plexClientId)
+	req.Header.Set("Accept", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "GET request failed", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	var res []PlexPlayer
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&res)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to decode the XML response", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, res)
 }

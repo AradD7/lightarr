@@ -12,14 +12,15 @@ import (
 )
 
 type PlexAccount struct {
-	Id		int 	`json:"id"`
-	Title	string 	`json:"title"`
+	Id		  int 	 `json:"id"`
+	Title	  string `json:"title"`
+	Thumbnail string `json:"thumb"`
 }
 
 type PlexPlayer struct {
-	Uuid 		string `json:"uuid"`
-	Title 		string `json:"title"`
-	PublicAddr 	string `json:"publicAddress"`
+	Id 		 int 	`json:"id"`
+	Name   	 string `json:"name"`
+	LastSeen string `json:"lastSeenAt"`
 }
 
 type PlexPayload struct {

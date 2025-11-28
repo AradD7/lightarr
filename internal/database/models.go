@@ -5,12 +5,14 @@
 package database
 
 import (
+	"database/sql"
 	"time"
 )
 
 type Account struct {
 	ID    int64
 	Title string
+	Thumb sql.NullString
 }
 
 type Bulb struct {
@@ -23,9 +25,9 @@ type Bulb struct {
 }
 
 type Player struct {
-	Uuid          string
-	Title         string
-	PublicAddress string
+	ID       int64
+	Name     string
+	LastSeen string
 }
 
 type Rule struct {
