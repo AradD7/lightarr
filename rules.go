@@ -1,11 +1,12 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"slices"
 
+	"github.com/AradD7/lightarr/internal/database"
 	"github.com/AradD7/lightarr/internal/wiz"
 	"github.com/google/uuid"
 )
@@ -31,63 +32,85 @@ type PlexPayload struct {
 
 type WizAction struct {
 	Command 	[]wiz.WizCommand `json:"command"`
-	BulbId		[]string		 `json:"BulbIds"`
+	BulbsMac	[]string		 `json:"BulbsMac"`
+}
+
+type RuleCondition struct {
+	Event 	[]string 		`json:"event"`
+	Account []PlexAccount	`json:"account"`
+	Player 	[]PlexPlayer	`json:"player"`
 }
 
 type Rule struct {
-	Id 		  uuid.UUID		`json:"ruleID"`
-	Condition struct {
-		Event 	[]string 		`json:"event"`
-		Account []PlexAccount	`json:"account"`
-		Player 	[]PlexPlayer	`json:"player"`
-	} `json:"condition"`
+	Id 		  string		`json:"ruleID"`
+	Condition RuleCondition `json:"condition"`
 	Action 	  []WizAction	`json:"action"`
 }
 
-func (cfg *config) loadRules() {
-	data, err := os.ReadFile(rulesCache)
+func (cfg *config) loadRules() error {
+	rules, err := cfg.db.GetAllRules(context.Background())
 	if err != nil {
-		fmt.Printf("Failed to read rules cache file: %s\n", err.Error())
-		return
+		return err
 	}
 
-	err = json.Unmarshal(data, &cfg.rules)
-	if err != nil {
-		fmt.Printf("Failed to unmarshal rules: %s\n", err)
-		return
+	for _, rule := range rules {
+		var tempCondition RuleCondition
+		var tempWizAction []WizAction
+		if err := json.Unmarshal([]byte(rule.Condition), &tempCondition); err != nil {
+			fmt.Printf("Failed to unmarshal condition of rule %s\n", err.Error())
+			continue
+		}
+		if err := json.Unmarshal([]byte(rule.Action), &tempWizAction); err != nil {
+			fmt.Printf("Failed to unmarshal Wiz Action of rule %s\n", err.Error())
+			continue
+		}
+		cfg.rules = append(cfg.rules, Rule{
+			Id: 		rule.ID,
+			Condition:  tempCondition,
+			Action: 	tempWizAction,
+		})
 	}
+
+	return nil
 }
 
-func (cfg *config) addRule(event []string, account []PlexAccount, player []PlexPlayer, actions []WizAction) {
+func (cfg *config) addRule(event []string, account []PlexAccount, player []PlexPlayer, actions []WizAction) error {
 	newRule := Rule{}
-	newRule.Id = uuid.New()
+	newRule.Id = uuid.New().String()
 	newRule.Condition.Account = append(newRule.Condition.Account, account...)
 	newRule.Condition.Event = append(newRule.Condition.Event, event...)
 	newRule.Condition.Player = append(newRule.Condition.Player, player...)
 	newRule.Action = append(newRule.Action, actions...)
 	cfg.rules = append(cfg.rules, newRule)
 
-	data, err := json.MarshalIndent(cfg.rules, "", "  ")
+	conditionData, err := json.Marshal(newRule.Condition)
 	if err != nil {
-		fmt.Printf("Failed to marshal rules: %s\n", err)
-		return
+		return fmt.Errorf("Failed to marshal rules: %s", err)
 	}
 
-	err = os.WriteFile(rulesCache, data, 0644)
+	actionData, err := json.Marshal(newRule.Action)
 	if err != nil {
-		fmt.Printf("Failed to write to %s file: %s\n", rulesCache, err)
-		return
+		return fmt.Errorf("Failed to marshal rules: %s", err)
 	}
+
+	if _, err := cfg.db.AddRule(context.Background(), database.AddRuleParams{
+		ID: 		newRule.Id,
+		Condition:  string(conditionData),
+		Action: 	string(actionData),
+	}); err != nil {
+		return fmt.Errorf("Failed to add rule to db: %s", err)
+	}
+	return nil
 }
 
-func (cfg *config) deleteRule(id uuid.UUID) error {
+func (cfg *config) deleteRule(id string) error {
 	for idx, rule := range cfg.rules {
 		if rule.Id == id {
 			cfg.rules = slices.Delete(cfg.rules, idx, idx + 1)
-			return nil
+			return cfg.db.DeleteRule(context.Background(), id)
 		}
 	}
-	return fmt.Errorf("Failed to fund rule with id %s", id.String())
+	return fmt.Errorf("Failed to fund rule with id %s", id)
 }
 
 func (cfg *config) triggersRule(payload PlexPayload) []WizAction {
@@ -103,7 +126,7 @@ func (cfg *config) triggersRule(payload PlexPayload) []WizAction {
 	return nil
 }
 
-func (cfg *config) getBulbByBulbId(bulbMac string) *wiz.Bulb{
+func (cfg *config) getBulbByBulbMac(bulbMac string) *wiz.Bulb{
 	for _, bulb := range cfg.bulbsMap {
 		if bulb.Mac == bulbMac {
 			return bulb
@@ -115,12 +138,12 @@ func (cfg *config) getBulbByBulbId(bulbMac string) *wiz.Bulb{
 func (cfg *config) executeActions(actions []WizAction) {
 	for _, action := range actions {
 		for _, cmd := range action.Command {
-			for _, id := range action.BulbId {
-				bulb := cfg.getBulbByBulbId(id)
+			for _, mac := range action.BulbsMac {
+				bulb := cfg.getBulbByBulbMac(mac)
 				if bulb != nil {
 					bulb.Execute(cfg.conn, cmd)
 				} else {
-					fmt.Printf("Failed to find a bulb with id %s\n", id)
+					fmt.Printf("Failed to find a bulb with id %s\n", mac)
 				}
 			}
 		}

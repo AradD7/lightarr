@@ -54,7 +54,10 @@ func main() {
 		conn: 		conn,
 	}
 	config.LoadBulbs(conn)
-	config.loadRules()
+	err = config.loadRules()
+	if err != nil {
+		fmt.Println("Failed to load rules", err.Error())
+	}
 
 	mux := http.NewServeMux()
 
@@ -62,11 +65,11 @@ func main() {
 	mux.HandleFunc("POST /api/bulbs/updatename", config.handlerUpdateBulbName)
 
 	mux.HandleFunc("GET /api/accounts", config.handlerGetAllAccounts)
-	mux.HandleFunc("GET /api/devices", config.handlerGetAllPlayers)
+	mux.HandleFunc("GET /api/players", config.handlerGetAllPlayers)
 	mux.HandleFunc("POST /api/accounts", config.handlerAddAccounts)
-	mux.HandleFunc("POST /api/devices", config.handlerAddDevices)
+	mux.HandleFunc("POST /api/players", config.handlerAddPlayers)
 	mux.HandleFunc("DELETE /api/accounts/{accountId}", config.handlerDeleteAccount)
-	mux.HandleFunc("DELETE /api/devices/{deviceId}", config.handlerDeleteDevice)
+	mux.HandleFunc("DELETE /api/devices/{playerId}", config.handlerDeletePlayer)
 
 	mux.HandleFunc("GET /api/rules", config.handlerGetAllRules)
 	mux.HandleFunc("POST /api/rules", config.handlerAddRule)
