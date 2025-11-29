@@ -34,9 +34,9 @@ func (q *Queries) AddPlexAccount(ctx context.Context, arg AddPlexAccountParams) 
 	return i, err
 }
 
-const addPlexPlayer = `-- name: AddPlexPlayer :one
+const addPlexDevice = `-- name: AddPlexDevice :one
 
-INSERT INTO players (id, name, last_seen)
+INSERT INTO devices (id, name, last_seen)
 VALUES (
     ?,
     ?,
@@ -45,15 +45,15 @@ VALUES (
 RETURNING id, name, last_seen
 `
 
-type AddPlexPlayerParams struct {
+type AddPlexDeviceParams struct {
 	ID       int64
 	Name     string
 	LastSeen string
 }
 
-func (q *Queries) AddPlexPlayer(ctx context.Context, arg AddPlexPlayerParams) (Player, error) {
-	row := q.db.QueryRowContext(ctx, addPlexPlayer, arg.ID, arg.Name, arg.LastSeen)
-	var i Player
+func (q *Queries) AddPlexDevice(ctx context.Context, arg AddPlexDeviceParams) (Device, error) {
+	row := q.db.QueryRowContext(ctx, addPlexDevice, arg.ID, arg.Name, arg.LastSeen)
+	var i Device
 	err := row.Scan(&i.ID, &i.Name, &i.LastSeen)
 	return i, err
 }
@@ -69,14 +69,14 @@ func (q *Queries) DeleteAccount(ctx context.Context, id int64) error {
 	return err
 }
 
-const deletePlayer = `-- name: DeletePlayer :exec
+const deleteDevice = `-- name: DeleteDevice :exec
 
-DELETE FROM players
+DELETE FROM devices
 WHERE id = ?
 `
 
-func (q *Queries) DeletePlayer(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, deletePlayer, id)
+func (q *Queries) DeleteDevice(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteDevice, id)
 	return err
 }
 
@@ -107,20 +107,20 @@ func (q *Queries) GetAllAccounts(ctx context.Context) ([]Account, error) {
 	return items, nil
 }
 
-const getAllPlayers = `-- name: GetAllPlayers :many
+const getAllDevices = `-- name: GetAllDevices :many
 
-SELECT id, name, last_seen FROM players
+SELECT id, name, last_seen FROM devices
 `
 
-func (q *Queries) GetAllPlayers(ctx context.Context) ([]Player, error) {
-	rows, err := q.db.QueryContext(ctx, getAllPlayers)
+func (q *Queries) GetAllDevices(ctx context.Context) ([]Device, error) {
+	rows, err := q.db.QueryContext(ctx, getAllDevices)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Player
+	var items []Device
 	for rows.Next() {
-		var i Player
+		var i Device
 		if err := rows.Scan(&i.ID, &i.Name, &i.LastSeen); err != nil {
 			return nil, err
 		}

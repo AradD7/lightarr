@@ -17,7 +17,7 @@ type PlexAccount struct {
 	Thumbnail string `json:"thumb"`
 }
 
-type PlexPlayer struct {
+type PlexDevice struct {
 	Id 		 int 	`json:"id"`
 	Name   	 string `json:"name"`
 	LastSeen string `json:"lastSeenAt"`
@@ -26,7 +26,7 @@ type PlexPlayer struct {
 type PlexPayload struct {
 	Event 	string 		`json:"event"`
 	Account PlexAccount `json:"Account"`
-	Player 	PlexPlayer	`json:"Player"`
+	Player 	PlexDevice	`json:"Player"`
 }
 
 type WizAction struct {
@@ -37,7 +37,7 @@ type WizAction struct {
 type RuleCondition struct {
 	Event 	[]string 		`json:"event"`
 	Account []PlexAccount	`json:"account"`
-	Player 	[]PlexPlayer	`json:"player"`
+	Player 	[]PlexDevice	`json:"player"`
 }
 
 type Rule struct {
@@ -78,7 +78,7 @@ func (cfg *config) loadRules() error {
 	return nil
 }
 
-func (cfg *config) addRule(event []string, account []PlexAccount, player []PlexPlayer, actions []WizAction) error {
+func (cfg *config) addRule(event []string, account []PlexAccount, player []PlexDevice, actions []WizAction) error {
 	newRule := Rule{}
 	newRule.Id = uuid.New().String()
 	newRule.Condition.Account = append(newRule.Condition.Account, account...)

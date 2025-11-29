@@ -28,15 +28,15 @@ func (cfg *config) handlerGetAllAccounts(w http.ResponseWriter, r *http.Request)
 	respondWithJSON(w, http.StatusOK, resp)
 }
 
-func (cfg *config) handlerGetAllPlayers(w http.ResponseWriter, r *http.Request) {
-	players, err := cfg.db.GetAllPlayers(r.Context())
+func (cfg *config) handlerGetAllDevices(w http.ResponseWriter, r *http.Request) {
+	players, err := cfg.db.GetAllDevices(r.Context())
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Failed to get players from database", err)
 		return
 	}
-	var resp []PlexPlayer
+	var resp []PlexDevice
 	for _, player := range players {
-		resp = append(resp, PlexPlayer{
+		resp = append(resp, PlexDevice{
 			Id: 	  int(player.ID),
 			Name:  	  player.Name,
 			LastSeen: player.LastSeen,
@@ -70,26 +70,26 @@ func (cfg *config) handlerAddAccounts(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, fmt.Sprintf("Added %d/%d of the accounts", addedAccounts, len(accounts)))
 }
 
-func (cfg *config) handlerAddPlayers(w http.ResponseWriter, r *http.Request) {
-	var players []PlexPlayer
+func (cfg *config) handlerAddDevice(w http.ResponseWriter, r *http.Request) {
+	var players []PlexDevice
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&players); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Failed to decode json", err)
 		return
 	}
 
-	addedPlayers := 0
+	addedDevices := 0
 	for _, player := range players {
-		if _, err := cfg.db.AddPlexPlayer(r.Context(), database.AddPlexPlayerParams{
+		if _, err := cfg.db.AddPlexDevice(r.Context(), database.AddPlexDeviceParams{
 			ID:  		int64(player.Id),
 			Name: 		player.Name,
 			LastSeen:   player.LastSeen,
 		}); err != nil {
-			addedPlayers -= 1
+			addedDevices -= 1
 		}
-		addedPlayers += 1
+		addedDevices += 1
 	}
-	respondWithJSON(w, http.StatusOK, fmt.Sprintf("Added %d/%d of the players", addedPlayers, len(players)))
+	respondWithJSON(w, http.StatusOK, fmt.Sprintf("Added %d/%d of the players", addedDevices, len(players)))
 }
 
 
@@ -106,7 +106,7 @@ func (cfg *config) handlerDeleteAccount(w http.ResponseWriter, r *http.Request) 
 	respondWithJSON(w, http.StatusOK, "Deleted!")
 }
 
-func (cfg *config) handlerDeletePlayer(w http.ResponseWriter, r *http.Request) {
+func (cfg *config) handlerDeleteDevice(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("playerId"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid Id", err)
@@ -190,7 +190,7 @@ func (cfg *config) handlerPlexAllAccounts(w http.ResponseWriter, r *http.Request
 	respondWithJSON(w, http.StatusOK, accounts)
 }
 
-func (cfg *config) handlerPlexAllPlayers(w http.ResponseWriter, r *http.Request) {
+func (cfg *config) handlerPlexAllDevices(w http.ResponseWriter, r *http.Request) {
 	req, err := http.NewRequest("GET", "https://clients.plex.tv/devices", nil)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Failed to create a GET request", err)
@@ -206,7 +206,7 @@ func (cfg *config) handlerPlexAllPlayers(w http.ResponseWriter, r *http.Request)
 	}
 	defer resp.Body.Close()
 
-	var res []PlexPlayer
+	var res []PlexDevice
 	decoder := json.NewDecoder(resp.Body)
 	err = decoder.Decode(&res)
 	if err != nil {

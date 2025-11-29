@@ -1,5 +1,5 @@
 -- +goose Up
-CREATE TABLE players (
+CREATE TABLE devices (
     id          INTEGER PRIMARY KEY,
     name        TEXT NOT NULL,
     last_seen   TEXT NOT NULL
@@ -11,5 +11,5 @@ CREATE TABLE accounts (
     thumb   TEXT
 );
 -- +goose Down
-DROP TABLE players;
+DROP TABLE devices;
 DROP TABLE accounts;

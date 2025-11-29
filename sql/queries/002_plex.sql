@@ -2,12 +2,12 @@
 SELECT * FROM accounts;
 --
 
--- name: GetAllPlayers :many
-SELECT * FROM players;
+-- name: GetAllDevices :many
+SELECT * FROM devices;
 --
 
--- name: AddPlexPlayer :one
-INSERT INTO players (id, name, last_seen)
+-- name: AddPlexDevice :one
+INSERT INTO devices (id, name, last_seen)
 VALUES (
     ?,
     ?,
@@ -26,8 +26,8 @@ VALUES (
 RETURNING *;
 --
 
--- name: DeletePlayer :exec
-DELETE FROM players
+-- name: DeleteDevice :exec
+DELETE FROM devices
 WHERE id = ?;
 --
 

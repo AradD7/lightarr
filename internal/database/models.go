@@ -24,7 +24,7 @@ type Bulb struct {
 	IsReachable bool
 }
 
-type Player struct {
+type Device struct {
 	ID       int64
 	Name     string
 	LastSeen string

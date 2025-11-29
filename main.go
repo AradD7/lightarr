@@ -72,11 +72,11 @@ func main() {
 	mux.HandleFunc("POST /api/bulbs/flash", config.handlerFlashBulb)
 
 	mux.HandleFunc("GET /api/accounts", config.handlerGetAllAccounts)
-	mux.HandleFunc("GET /api/players", config.handlerGetAllPlayers)
+	mux.HandleFunc("GET /api/devices", config.handlerGetAllDevices)
 	mux.HandleFunc("POST /api/accounts", config.handlerAddAccounts)
-	mux.HandleFunc("POST /api/players", config.handlerAddPlayers)
+	mux.HandleFunc("POST /api/devices", config.handlerAddDevice)
 	mux.HandleFunc("DELETE /api/accounts/{accountId}", config.handlerDeleteAccount)
-	mux.HandleFunc("DELETE /api/devices/{playerId}", config.handlerDeletePlayer)
+	mux.HandleFunc("DELETE /api/devices/{playerId}", config.handlerDeleteDevice)
 
 	mux.HandleFunc("GET /api/rules", config.handlerGetAllRules)
 	mux.HandleFunc("POST /api/rules", config.handlerAddRule)
@@ -85,7 +85,7 @@ func main() {
 	mux.HandleFunc("POST /plexhook", config.handlerPlexWebhook)
 
 	mux.HandleFunc("GET /api/plex/accounts", config.handlerPlexAllAccounts)
-	mux.HandleFunc("GET /api/plex/players", config.handlerPlexAllPlayers)
+	mux.HandleFunc("GET /api/plex/devices", config.handlerPlexAllDevices)
 
 	srv := &http.Server {
 		Handler: mux,
