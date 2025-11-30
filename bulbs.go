@@ -36,6 +36,7 @@ func (cfg *config) LoadBulbs(conn *net.UDPConn) {
 				Port: 	38899,
 			},
 			IsReachable: false,
+			Type: 		 bulb.Type,
 		}
 
 		bulbsMap[bulb.Mac] = &currentBulb
@@ -95,6 +96,7 @@ func (cfg *config) UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*wiz.Bulb)
 					Port: 	38899,
 				},
 				IsReachable: true,
+				Type: 		 "normal",
 			}
 			_, err := cfg.db.AddBulb(context.Background(), database.AddBulbParams{
 				Mac: 		 params.Result.Mac,

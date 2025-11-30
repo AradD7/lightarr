@@ -22,6 +22,7 @@ type Bulb struct {
 	Ip          string
 	Name        string
 	IsReachable bool
+	Type        string
 }
 
 type Device struct {

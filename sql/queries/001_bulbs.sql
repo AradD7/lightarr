@@ -30,3 +30,9 @@ WHERE mac = ?;
 DELETE FROM bulbs
 where mac = ?;
 --
+
+-- name: UpdateBulbType :exec
+UPDATE bulbs
+SET type = ?, updated_at = ?
+WHERE mac = ?;
+--

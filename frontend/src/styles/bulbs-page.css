@@ -1,0 +1,61 @@
+div.bulbs-page {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+.bulb-item {
+    width: 250px;
+    height: 200px;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    background-color: var(--containerColor);
+    border-radius: 20px;
+}
+
+.bulb-item > img {
+    height: 200px;
+    border-radius: 20px;
+}
+
+.bulb-item-info {
+    display: flex;
+    height: 230px;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.bulb-item-info > h2.bulb-name {
+    margin: 0;
+    color: var(--textInContainerColor);
+    font-size: 1.9rem;
+}
+
+.bulb-item-info > h2.bulb-mac {
+    margin: 0;
+    color: var(--textInContainerColor);
+    font-size: 1.2rem;
+}
+
+.bulb-flash-button {
+    font-family: "IBM Plex Sans", sans-serif;
+    width: fit-content;
+    height: 50px;
+    background-color: var(--plexYellow);
+    border: none;
+    border-radius: 5px;
+    font-size: 1.5rem;
+    font-weight: 800;
+    transition: background-color 0.1s ease;
+    padding: 0 10px;
+}
+
+.bulb-flash-button:hover {
+    background-color: var(--buttonHoverColor);
+    cursor: pointer;
+}

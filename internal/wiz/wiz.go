@@ -12,6 +12,7 @@ type Bulb struct {
 	Mac  		string 		 `json:"mac"`
 	Addr 		*net.UDPAddr `json:"-"`
 	IsReachable bool 		 `json:"isReachable"`
+	Type 		string 		 `json:"type"`
 }
 
 type Color struct {

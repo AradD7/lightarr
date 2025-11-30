@@ -20,7 +20,7 @@ VALUES (
     ?,
     ?
 )
-RETURNING mac, created_at, updated_at, ip, name, is_reachable
+RETURNING mac, created_at, updated_at, ip, name, is_reachable, type
 `
 
 type AddBulbParams struct {
@@ -49,6 +49,7 @@ func (q *Queries) AddBulb(ctx context.Context, arg AddBulbParams) (Bulb, error) 
 		&i.Ip,
 		&i.Name,
 		&i.IsReachable,
+		&i.Type,
 	)
 	return i, err
 }
@@ -65,7 +66,7 @@ func (q *Queries) DeleteBulb(ctx context.Context, mac string) error {
 }
 
 const getAllBulbs = `-- name: GetAllBulbs :many
-SELECT mac, created_at, updated_at, ip, name, is_reachable FROM bulbs
+SELECT mac, created_at, updated_at, ip, name, is_reachable, type FROM bulbs
 `
 
 func (q *Queries) GetAllBulbs(ctx context.Context) ([]Bulb, error) {
@@ -84,6 +85,7 @@ func (q *Queries) GetAllBulbs(ctx context.Context) ([]Bulb, error) {
 			&i.Ip,
 			&i.Name,
 			&i.IsReachable,
+			&i.Type,
 		); err != nil {
 			return nil, err
 		}
@@ -131,5 +133,23 @@ type UpdateBulbNameParams struct {
 
 func (q *Queries) UpdateBulbName(ctx context.Context, arg UpdateBulbNameParams) error {
 	_, err := q.db.ExecContext(ctx, updateBulbName, arg.Name, arg.UpdatedAt, arg.Mac)
+	return err
+}
+
+const updateBulbType = `-- name: UpdateBulbType :exec
+
+UPDATE bulbs
+SET type = ?, updated_at = ?
+WHERE mac = ?
+`
+
+type UpdateBulbTypeParams struct {
+	Type      string
+	UpdatedAt time.Time
+	Mac       string
+}
+
+func (q *Queries) UpdateBulbType(ctx context.Context, arg UpdateBulbTypeParams) error {
+	_, err := q.db.ExecContext(ctx, updateBulbType, arg.Type, arg.UpdatedAt, arg.Mac)
 	return err
 }
