@@ -39,57 +39,51 @@ func (cfg *config) handlerGetAllDevices(w http.ResponseWriter, r *http.Request) 
 		resp = append(resp, PlexDevice{
 			Id: 	  int(player.ID),
 			Name:  	  player.Name,
-			LastSeen: player.LastSeen,
+			Product:  player.Product,
 		})
 	}
 	respondWithJSON(w, http.StatusOK, resp)
 }
 
-func (cfg *config) handlerAddAccounts(w http.ResponseWriter, r *http.Request) {
-	var accounts []PlexAccount
+func (cfg *config) handlerAddAccount(w http.ResponseWriter, r *http.Request) {
+	var account PlexAccount
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&accounts); err != nil {
+	if err := decoder.Decode(&account); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Failed to decode json", err)
 		return
 	}
 
-	addedAccounts := 0
-	for _, account := range accounts{
-		if _, err := cfg.db.AddPlexAccount(r.Context(), database.AddPlexAccountParams{
-			ID: 	int64(account.Id),
-			Title:  account.Title,
-			Thumb:  sql.NullString{
-				Valid: true,
-				String: account.Thumbnail,
-			},
-		}); err != nil {
-			addedAccounts -= 1
-		}
-		addedAccounts += 1
+	if _, err := cfg.db.AddPlexAccount(r.Context(), database.AddPlexAccountParams{
+		ID: 	int64(account.Id),
+		Title:  account.Title,
+		Thumb:  sql.NullString{
+			Valid: true,
+			String: account.Thumbnail,
+		},
+	}); err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to add account to database", err)
+		return
 	}
-	respondWithJSON(w, http.StatusOK, fmt.Sprintf("Added %d/%d of the accounts", addedAccounts, len(accounts)))
+	respondWithJSON(w, http.StatusOK, "Account added!")
 }
 
 func (cfg *config) handlerAddDevice(w http.ResponseWriter, r *http.Request) {
-	var players []PlexDevice
+	var player PlexDevice
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&players); err != nil {
+	if err := decoder.Decode(&player); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Failed to decode json", err)
 		return
 	}
 
-	addedDevices := 0
-	for _, player := range players {
-		if _, err := cfg.db.AddPlexDevice(r.Context(), database.AddPlexDeviceParams{
-			ID:  		int64(player.Id),
-			Name: 		player.Name,
-			LastSeen:   player.LastSeen,
-		}); err != nil {
-			addedDevices -= 1
-		}
-		addedDevices += 1
+	if _, err := cfg.db.AddPlexDevice(r.Context(), database.AddPlexDeviceParams{
+		ID:  		int64(player.Id),
+		Name: 		player.Name,
+		Product: 	player.Product,
+	}); err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to add device to database", err)
+		return
 	}
-	respondWithJSON(w, http.StatusOK, fmt.Sprintf("Added %d/%d of the players", addedDevices, len(players)))
+	respondWithJSON(w, http.StatusOK, "Added device")
 }
 
 
@@ -107,12 +101,12 @@ func (cfg *config) handlerDeleteAccount(w http.ResponseWriter, r *http.Request) 
 }
 
 func (cfg *config) handlerDeleteDevice(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.PathValue("playerId"))
+	id, err := strconv.Atoi(r.PathValue("deviceId"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid Id", err)
 		return
 	}
-	if err := cfg.db.DeleteAccount(r.Context(), int64(id)); err != nil {
+	if err := cfg.db.DeleteDevice(r.Context(), int64(id)); err != nil {
 		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Found no player with %d id", id), err)
 		return
 	}

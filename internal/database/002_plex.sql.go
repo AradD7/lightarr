@@ -36,25 +36,25 @@ func (q *Queries) AddPlexAccount(ctx context.Context, arg AddPlexAccountParams) 
 
 const addPlexDevice = `-- name: AddPlexDevice :one
 
-INSERT INTO devices (id, name, last_seen)
+INSERT INTO devices (id, name, product)
 VALUES (
     ?,
     ?,
     ?
 )
-RETURNING id, name, last_seen
+RETURNING id, name, product
 `
 
 type AddPlexDeviceParams struct {
-	ID       int64
-	Name     string
-	LastSeen string
+	ID      int64
+	Name    string
+	Product string
 }
 
 func (q *Queries) AddPlexDevice(ctx context.Context, arg AddPlexDeviceParams) (Device, error) {
-	row := q.db.QueryRowContext(ctx, addPlexDevice, arg.ID, arg.Name, arg.LastSeen)
+	row := q.db.QueryRowContext(ctx, addPlexDevice, arg.ID, arg.Name, arg.Product)
 	var i Device
-	err := row.Scan(&i.ID, &i.Name, &i.LastSeen)
+	err := row.Scan(&i.ID, &i.Name, &i.Product)
 	return i, err
 }
 
@@ -109,7 +109,7 @@ func (q *Queries) GetAllAccounts(ctx context.Context) ([]Account, error) {
 
 const getAllDevices = `-- name: GetAllDevices :many
 
-SELECT id, name, last_seen FROM devices
+SELECT id, name, product FROM devices
 `
 
 func (q *Queries) GetAllDevices(ctx context.Context) ([]Device, error) {
@@ -121,7 +121,7 @@ func (q *Queries) GetAllDevices(ctx context.Context) ([]Device, error) {
 	var items []Device
 	for rows.Next() {
 		var i Device
-		if err := rows.Scan(&i.ID, &i.Name, &i.LastSeen); err != nil {
+		if err := rows.Scan(&i.ID, &i.Name, &i.Product); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

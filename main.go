@@ -16,6 +16,24 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Set CORS headers
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		// Handle preflight OPTIONS request
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		// Continue to the next handler
+		next.ServeHTTP(w, r)
+	})
+}
+
 type config struct {
 	db 			 *database.Queries
 	conn 		 *net.UDPConn
@@ -73,10 +91,10 @@ func main() {
 
 	mux.HandleFunc("GET /api/accounts", config.handlerGetAllAccounts)
 	mux.HandleFunc("GET /api/devices", config.handlerGetAllDevices)
-	mux.HandleFunc("POST /api/accounts", config.handlerAddAccounts)
+	mux.HandleFunc("POST /api/accounts", config.handlerAddAccount)
 	mux.HandleFunc("POST /api/devices", config.handlerAddDevice)
 	mux.HandleFunc("DELETE /api/accounts/{accountId}", config.handlerDeleteAccount)
-	mux.HandleFunc("DELETE /api/devices/{playerId}", config.handlerDeleteDevice)
+	mux.HandleFunc("DELETE /api/devices/{deviceId}", config.handlerDeleteDevice)
 
 	mux.HandleFunc("GET /api/rules", config.handlerGetAllRules)
 	mux.HandleFunc("POST /api/rules", config.handlerAddRule)
@@ -88,7 +106,7 @@ func main() {
 	mux.HandleFunc("GET /api/plex/devices", config.handlerPlexAllDevices)
 
 	srv := &http.Server {
-		Handler: mux,
+		Handler: corsMiddleware(mux),
 		Addr: 	 ":" + port,
 	}
 

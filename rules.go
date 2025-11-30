@@ -21,6 +21,7 @@ type PlexDevice struct {
 	Id 		 int 	`json:"id"`
 	Name   	 string `json:"name"`
 	LastSeen string `json:"lastSeenAt"`
+	Product  string `json:"product"`
 }
 
 type PlexPayload struct {

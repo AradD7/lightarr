@@ -7,7 +7,7 @@ SELECT * FROM devices;
 --
 
 -- name: AddPlexDevice :one
-INSERT INTO devices (id, name, last_seen)
+INSERT INTO devices (id, name, product)
 VALUES (
     ?,
     ?,

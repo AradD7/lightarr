@@ -1,0 +1,175 @@
+.plex-page-accounts {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    flex-direction: column;
+}
+
+.header-with-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.header-with-dropdown > h1 {
+    text-align: center;
+    color: var(--plexYellow);
+    font-weight: 800;
+    font-size: 2.5rem;
+    margin: 20px 0 5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.dropdown-arrow {
+    font-size: 2.5rem !important;
+    cursor: pointer;
+    user-select: none;
+    color: var(--plexYellow);
+    font-weight: 800 !important;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--containerColor);
+    border: 2px solid var(--plexYellow);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    min-width: 220px;
+    z-index: 100;
+    margin-top: 0.5rem;
+    overflow: hidden;
+}
+
+.dropdown-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    color: var(--textInContainerColor);
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(229, 160, 13, 0.2);
+}
+
+.dropdown-item.active {
+    background-color: var(--plexYellow);
+    color: #000;
+    font-weight: bold;
+}
+
+div.accounts {
+    margin: 0 0 20px;
+    width: 90vw;
+    max-width: 1000px;
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 50px 70px;
+}
+
+div.accounts > h2 {
+    color: var(--textInContainerColor);
+}
+
+.account-item {
+    position: relative;
+    width: 170px;
+    height: 190px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: var(--containerColor);
+    border-radius: 10px;
+}
+
+.account-item > h1 {
+    padding-top: 10px;
+    margin: 0;
+    color: var(--textInContainerColor);
+    line-height: 1;
+    text-align: center;
+    font-size: 1.4rem;
+}
+
+.account-item > img {
+    width: 130px;
+    padding: 0;
+    margin: 0;
+    border-radius: 65px;
+}
+
+.device-product {
+    font-size: 0.9rem;
+    color: var(--textInContainerColor);
+    opacity: 0.7;
+    margin: 5px 0 0 0;
+    text-align: center;
+}
+
+span.account-delete-icon {
+    position: absolute;
+    font-size: 2.2rem;
+    font-weight: 400;
+    transition: font-weight 0.2s ease;
+    transform: translate(-65px, -75px);
+    color: red;
+}
+
+span.account-add-icon {
+    position: absolute;
+    font-size: 2.2rem;
+    font-weight: 400;
+    transition: font-weight 0.2s ease;
+    transform: translate(65px, -75px);
+    color: var(--iconColor);
+}
+
+span.material-symbols-outlined:hover {
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.plex-add-button {
+    font-family: "IBM Plex Sans", sans-serif;
+    width: fit-content;
+    height: 45px;
+    background-color: var(--plexYellow);
+    border: none;
+    border-radius: 5px;
+    font-size: 1.3rem;
+    font-weight: 800;
+    transition: background-color 0.1s ease;
+    padding: 0 10px;
+}
+
+.plex-add-button:hover {
+    background-color: var(--buttonHoverColor);
+    cursor: pointer;
+}
+
+.account-item-status {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    z-index: 10;
+    border-radius: inherit;
+}

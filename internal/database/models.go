@@ -25,9 +25,9 @@ type Bulb struct {
 }
 
 type Device struct {
-	ID       int64
-	Name     string
-	LastSeen string
+	ID      int64
+	Name    string
+	Product string
 }
 
 type Rule struct {

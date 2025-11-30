@@ -1,0 +1,67 @@
+:root{
+    --backgroundColor: #202020;
+    --textColorDark: #080909;
+    --plexYellow: #E5B93C;
+    --buttonHoverColor: #E5B93CA0;
+    --containerColor: #1A1A1A;
+    --textInContainerColor: #C7CFFC;
+    --iconColor: #C7CFFC;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: "IBM Plex Sans", sans-serif;
+}
+
+html {
+    background-color: var(--backgroundColor);
+    color: var(--textColorDark);
+}
+
+body {
+    margin: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:visited {
+    color: inherit;
+}
+
+.nav-header {
+    width: 90vw;
+    max-width: 1000px;
+    background-color: #143CFC;
+    border-radius: 50px;
+}
+
+div.nav-links {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-weight: 700;
+    gap: 30px;
+}
+
+div.nav-links > a {
+    font-size: 2rem;
+    padding: 10px 0;
+    width: 27%;
+    text-align: center;
+    border-radius: 20px;
+    transition: background-color 0.15s ease;
+}
+
+div.nav-links > a:hover {
+    background-color: var(--buttonHoverColor);
+}
+
+div.nav-links > a.active {
+    background-color: var(--plexYellow);
+    cursor: inherit;
+}
