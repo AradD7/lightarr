@@ -53,6 +53,17 @@ func (q *Queries) AddBulb(ctx context.Context, arg AddBulbParams) (Bulb, error) 
 	return i, err
 }
 
+const deleteBulb = `-- name: DeleteBulb :exec
+
+DELETE FROM bulbs
+where mac = ?
+`
+
+func (q *Queries) DeleteBulb(ctx context.Context, mac string) error {
+	_, err := q.db.ExecContext(ctx, deleteBulb, mac)
+	return err
+}
+
 const getAllBulbs = `-- name: GetAllBulbs :many
 SELECT mac, created_at, updated_at, ip, name, is_reachable FROM bulbs
 `

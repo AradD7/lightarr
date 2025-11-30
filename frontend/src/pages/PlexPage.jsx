@@ -277,14 +277,15 @@ export default function PlexPage() {
     return (
         <div className="plex-page-accounts">
             <div className="header-with-dropdown">
-                <h1>
+                <h1
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                >
                     {showAll
                         ? (viewType === 'accounts' ? "All Accounts" : "All Devices")
                         : (viewType === 'accounts' ? "Saved Accounts" : "Saved Devices")
                     }
                     <span
                         className="material-symbols-outlined dropdown-arrow"
-                        onClick={() => setDropdownOpen(!dropdownOpen)}
                     >
                         {dropdownOpen ? 'arrow_drop_up' : 'arrow_drop_down'}
                     </span>

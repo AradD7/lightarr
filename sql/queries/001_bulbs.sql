@@ -25,3 +25,8 @@ UPDATE bulbs
 SET name = ?, updated_at = ?
 WHERE mac = ?;
 --
+
+-- name: DeleteBulb :exec
+DELETE FROM bulbs
+where mac = ?;
+--

@@ -44,7 +44,7 @@ func (cfg *config) LoadBulbs(conn *net.UDPConn) {
 	cfg.UpdateBulbs(conn, bulbsMap)
 }
 
-func (cfg *config) UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*wiz.Bulb) {
+func (cfg *config) UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*wiz.Bulb) int {
 	buffer := make([]byte, 1024)
 
 	if bulbsMap != nil {
@@ -129,4 +129,5 @@ func (cfg *config) UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*wiz.Bulb)
 	}
 
 	cfg.bulbsMap = bulbsMap
+	return bulbId
 }
