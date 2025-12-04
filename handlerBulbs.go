@@ -43,7 +43,7 @@ func (cfg *config) handlerUpdateBulbName(w http.ResponseWriter, r *http.Request)
 
 func (cfg *config) handlerFlashBulb(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		Mac  string `json:"mac"`
+		Mac string `json:"mac"`
 	}
 
 	var params parameters
@@ -60,4 +60,14 @@ func (cfg *config) handlerFlashBulb(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go bulb.Flash(cfg.conn)
+}
+
+func (cfg *config) handlerRefreshBulbs(w http.ResponseWriter, r *http.Request) {
+	type Resp struct {
+		NumNewBulbs int `json:"num"`
+	}
+
+	respondWithJSON(w, http.StatusOK, Resp{
+		NumNewBulbs: cfg.UpdateBulbs(cfg.conn, cfg.bulbsMap),
+	})
 }

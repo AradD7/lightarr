@@ -1,14 +1,34 @@
-div.bulbs-page {
+div.bulbs-page-contents {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    flex-direction: column;
+}
+
+div.bulbs-page-contents > h1 {
+    text-align: center;
+    color: var(--plexYellow);
+    font-weight: 800;
+    font-size: 1.8rem;
+    margin: 20px 0 5px;
+}
+
+div.bulbs-page {
+    margin: 0 0 20px;
+    width: 90vw;
+    max-width: 1000px;
+    display: flex;
+    justify-content: center;
     align-items: center;
     flex-wrap: wrap;
     margin-top: 30px;
+    gap: 40px 20px;
 }
 
 .bulb-item {
-    width: 250px;
-    height: 200px;
+    width: 280px;
+    height: 190px;
     display: flex;
     justify-content: space-evenly;
     align-items: center;
@@ -17,7 +37,7 @@ div.bulbs-page {
 }
 
 .bulb-item > img {
-    height: 200px;
+    height: 150px;
     border-radius: 20px;
 }
 
@@ -33,7 +53,7 @@ div.bulbs-page {
 .bulb-item-info > h2.bulb-name {
     margin: 0;
     color: var(--textInContainerColor);
-    font-size: 1.9rem;
+    font-size: 1.5rem;
 }
 
 .bulb-item-info > h2.bulb-mac {
@@ -45,17 +65,33 @@ div.bulbs-page {
 .bulb-flash-button {
     font-family: "IBM Plex Sans", sans-serif;
     width: fit-content;
-    height: 50px;
+    height: 35px;
     background-color: var(--plexYellow);
     border: none;
     border-radius: 5px;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: 800;
     transition: background-color 0.1s ease;
-    padding: 0 10px;
 }
 
-.bulb-flash-button:hover {
+.bulb-flash-button:hover:not(:disabled) {
+    background-color: var(--buttonHoverColor);
+    cursor: pointer;
+}
+
+.bulbs-refresh-button {
+    font-family: "IBM Plex Sans", sans-serif;
+    width: 300px;
+    height: 60px;
+    background-color: var(--plexYellow);
+    border: none;
+    border-radius: 35px;
+    font-size: 2.1rem;
+    font-weight: 800;
+    transition: background-color 0.1s ease;
+}
+
+.bulbs-refresh-button:hover:not(:disabled) {
     background-color: var(--buttonHoverColor);
     cursor: pointer;
 }

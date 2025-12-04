@@ -12,7 +12,7 @@ import (
 )
 
 type GetPilotParams struct {
-	Result struct{
+	Result struct {
 		Mac string `json:"mac"`
 	} `json:"result"`
 }
@@ -28,15 +28,15 @@ func (cfg *config) LoadBulbs(conn *net.UDPConn) {
 
 	for _, bulb := range data {
 		currentBulb := wiz.Bulb{
-			Mac: 		 bulb.Mac,
-			Ip: 		 net.ParseIP(bulb.Ip),
-			Name: 		 bulb.Name,
-			Addr: 		 &net.UDPAddr{
-				IP: 	net.ParseIP(bulb.Ip),
-				Port: 	38899,
+			Mac:  bulb.Mac,
+			Ip:   net.ParseIP(bulb.Ip),
+			Name: bulb.Name,
+			Addr: &net.UDPAddr{
+				IP:   net.ParseIP(bulb.Ip),
+				Port: 38899,
 			},
 			IsReachable: false,
-			Type: 		 bulb.Type,
+			Type:        bulb.Type,
 		}
 
 		bulbsMap[bulb.Mac] = &currentBulb
@@ -55,7 +55,7 @@ func (cfg *config) UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*wiz.Bulb)
 	}
 
 	broadcastAddr := &net.UDPAddr{
-		IP: net.IPv4bcast,
+		IP:   net.IPv4bcast,
 		Port: 38899,
 	}
 	conn.WriteToUDP([]byte(`{"method":"getPilot"}`), broadcastAddr)
@@ -77,31 +77,31 @@ func (cfg *config) UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*wiz.Bulb)
 				bulbsMap[params.Result.Mac].Addr.IP = remoteAddr.IP
 				bulbsMap[params.Result.Mac].Ip = remoteAddr.IP
 				err := cfg.db.UpdateBulbIp(context.Background(), database.UpdateBulbIpParams{
-					Mac: 		params.Result.Mac,
-					Ip: 		remoteAddr.IP.String(),
-					UpdatedAt: 	time.Now(),
+					Mac:       params.Result.Mac,
+					Ip:        remoteAddr.IP.String(),
+					UpdatedAt: time.Now(),
 				})
 				if err != nil {
 					fmt.Printf("Failed to update DB: %v\n", err.Error())
 				}
 				updatedBulbs += 1
 			}
-		} else {
+		} else if params.Result.Mac != "" {
 			bulbsMap[params.Result.Mac] = &wiz.Bulb{
-				Ip: 		 remoteAddr.IP,
-				Name: 		 "WizBulb",
-				Mac: 		 params.Result.Mac,
-				Addr: 		 &net.UDPAddr{
-					IP: 	remoteAddr.IP,
-					Port: 	38899,
+				Ip:   remoteAddr.IP,
+				Name: "WizBulb",
+				Mac:  params.Result.Mac,
+				Addr: &net.UDPAddr{
+					IP:   remoteAddr.IP,
+					Port: 38899,
 				},
 				IsReachable: true,
-				Type: 		 "normal",
+				Type:        "normal",
 			}
 			_, err := cfg.db.AddBulb(context.Background(), database.AddBulbParams{
-				Mac: 		 params.Result.Mac,
-				Ip: 		 remoteAddr.IP.String(),
-				Name: 		 "WizBulb",
+				Mac:         params.Result.Mac,
+				Ip:          remoteAddr.IP.String(),
+				Name:        "WizBulb",
 				CreatedAt:   time.Now(),
 				UpdatedAt:   time.Now(),
 				IsReachable: true,

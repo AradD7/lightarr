@@ -35,11 +35,11 @@ func corsMiddleware(next http.Handler) http.Handler {
 }
 
 type config struct {
-	db 			 *database.Queries
-	conn 		 *net.UDPConn
-	bulbsMap	 map[string]*wiz.Bulb
-	rules 		 []Rule
-	plexToken 	 string
+	db           *database.Queries
+	conn         *net.UDPConn
+	bulbsMap     map[string]*wiz.Bulb
+	rules        []Rule
+	plexToken    string
 	plexClientId string
 }
 
@@ -66,16 +66,15 @@ func main() {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}
 
-	conn, _ := net.ListenUDP("udp", &net.UDPAddr{Port: 0})
+	conn, _ := net.ListenUDP("udp", &net.UDPAddr{Port: 38899})
 	fmt.Printf("Opened a UDP connection on %s\n", conn.LocalAddr().String())
 	defer conn.Close()
 
-
 	config := config{
-		db: 			database.New(db),
-		conn: 			conn,
-		plexToken:  	xPlexToken,
-		plexClientId: 	xClientId,
+		db:           database.New(db),
+		conn:         conn,
+		plexToken:    xPlexToken,
+		plexClientId: xClientId,
 	}
 	config.LoadBulbs(conn)
 	err = config.loadRules()
@@ -88,6 +87,7 @@ func main() {
 	mux.HandleFunc("GET /api/bulbs", config.handlerGetBulbs)
 	mux.HandleFunc("POST /api/bulbs/updatename", config.handlerUpdateBulbName)
 	mux.HandleFunc("POST /api/bulbs/flash", config.handlerFlashBulb)
+	mux.HandleFunc("GET /api/bulbs/refresh", config.handlerRefreshBulbs)
 
 	mux.HandleFunc("GET /api/accounts", config.handlerGetAllAccounts)
 	mux.HandleFunc("GET /api/devices", config.handlerGetAllDevices)
@@ -105,12 +105,11 @@ func main() {
 	mux.HandleFunc("GET /api/plex/accounts", config.handlerPlexAllAccounts)
 	mux.HandleFunc("GET /api/plex/devices", config.handlerPlexAllDevices)
 
-	srv := &http.Server {
+	srv := &http.Server{
 		Handler: corsMiddleware(mux),
-		Addr: 	 ":" + port,
+		Addr:    ":" + port,
 	}
 
 	fmt.Printf("Api available on port: %s\n", port)
 	srv.ListenAndServe()
 }
-
