@@ -85,9 +85,10 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /api/bulbs", config.handlerGetBulbs)
-	mux.HandleFunc("POST /api/bulbs/updatename", config.handlerUpdateBulbName)
+	mux.HandleFunc("POST /api/bulbs/name", config.handlerUpdateBulbName)
 	mux.HandleFunc("POST /api/bulbs/flash", config.handlerFlashBulb)
 	mux.HandleFunc("GET /api/bulbs/refresh", config.handlerRefreshBulbs)
+	mux.HandleFunc("POST /api/bulbs/type", config.handlerUpdateBulbType)
 
 	mux.HandleFunc("GET /api/accounts", config.handlerGetAllAccounts)
 	mux.HandleFunc("GET /api/devices", config.handlerGetAllDevices)

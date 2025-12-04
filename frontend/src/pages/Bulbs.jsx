@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import normalBulb from "/assets/bulbs/normalBulb.png"
 import bulkyBulb from "/assets/bulbs/bulkyBulb.png"
 import vintageBulb from "/assets/bulbs/vintageBulb.png"
@@ -29,6 +29,24 @@ const flashBulbRequest = async (mac) => {
     if (!response.ok) throw new Error('Flash bulb request failed');
 };
 
+const updateBulbName = async ({ mac, name }) => {
+    const response = await fetch("http://localhost:10100/api/bulbs/name", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mac, name }),
+    });
+    if (!response.ok) throw new Error('Failed to update bulb name');
+};
+
+const updateBulbType = async ({ mac, type }) => {
+    const response = await fetch("http://localhost:10100/api/bulbs/type", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mac, type }),
+    });
+    if (!response.ok) throw new Error('Failed to update bulb type');
+};
+
 const getBulbImg = (bulbType) => {
     const bulbTypeLower = bulbType.toLowerCase();
     if (bulbTypeLower === "normal") return normalBulb;
@@ -40,11 +58,16 @@ const getBulbImg = (bulbType) => {
 }
 
 export default function Bulbs() {
-    const [flashingMac, setFlashingMac] = useState(null);
-    //const [changingNameMac, setChangingNameMac] = useState(null)
+    const [flashingMac, setFlashingMac] = useState(new Set());
+    const [changingBulbName, setChangingBulbName] = useState(null);
+    const [newName, setNewName] = useState('');
+    const [changingBulbType, setChangingBulbType] = useState(null);
+    const [newType, setNewType] = useState('');
 
 
-    const { data: bulbs, error } = useQuery({
+    const queryClient = useQueryClient();
+
+    const { data: bulbs, isLoading, error } = useQuery({
         queryKey: ['bulbs'],
         queryFn: fetchAllBulbs,
     });
@@ -59,14 +82,75 @@ export default function Bulbs() {
         mutationFn: flashBulbRequest,
     });
 
+    const updateNameMutation = useMutation({
+        mutationFn: updateBulbName,
+        onSuccess: (data, variables) => {
+            queryClient.setQueryData(['bulbs'], (oldBulbs) => {
+                return oldBulbs.map(bulb =>
+                    bulb.mac === variables.mac ?
+                        { ...bulb, name: variables.name } :
+                        bulb
+                );
+            });
+        },
+        onError: (error) => {
+            console.log(error)
+        },
+    });
+
+    const updateTypeMutation = useMutation({
+        mutationFn: updateBulbType,
+        onSuccess: (data, variables) => {
+            queryClient.setQueryData(['bulbs'], (oldBulbs) => {
+                return oldBulbs.map(bulb =>
+                    bulb.mac === variables.mac ?
+                        { ...bulb, type: variables.type } :
+                        bulb
+                );
+            });
+        },
+    });
+
     const flashBulb = (mac) => {
-        setFlashingMac(mac);
+        setFlashingMac(prev => new Set(prev).add(mac));
         flashBulbMutation.mutate(mac);
 
         setTimeout(() => {
-            setFlashingMac(null);
+            setFlashingMac(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(mac);
+                return newSet;
+            });
         }, 2900);
     }
+
+    const changeBulbName = (mac, currentName) => {
+        setChangingBulbName(mac);
+        setNewName(currentName);
+    };
+
+    const handleNameSubmit = (mac) => {
+        if (newName.trim()) {
+            setChangingBulbName(null);
+            updateNameMutation.mutate({ mac, name: newName.trim() });
+        } else {
+            setChangingBulbName(null);
+        }
+    };
+
+    const changeBulbType = (mac, currentType) => {
+        setChangingBulbType(mac);
+        setNewType(currentType);
+    };
+
+    const handleTypeSubmit = (mac) => {
+        if (newType.trim()) {
+            setChangingBulbType(null);
+            updateTypeMutation.mutate({ mac, type: newType.trim() });
+        } else {
+            setChangingBulbType(null);
+        }
+    };
 
     return (
         <div className="bulbs-page-contents">
@@ -81,28 +165,84 @@ export default function Bulbs() {
             }
             <div className="bulbs-page">
                 {error ? (
-                    <h2>Something went wrong getting bulbs</h2>
+                    <h2 className="bulb-page-status">Something went wrong getting bulbs</h2>
                 ) :
-                    bulbs?.length && bulbs?.map(bulb =>
-                        <section className="bulb-item" key={bulb.ip}>
-                            <img src={getBulbImg(bulb.type)} alt={`${bulb.type} wiz light bulb`} />
-                            <section className="bulb-item-info">
-                                <h2 className="bulb-name">
-                                    {bulb.name}
-                                </h2>
-                                <h2 className="bulb-mac">
-                                    {bulb.mac.toUpperCase()}
-                                </h2>
-                                <button
-                                    className="bulb-flash-button"
-                                    onClick={() => flashBulb(bulb.mac)}
-                                    disabled={flashingMac === bulb.mac}
+                    isLoading ?
+                        <h2 className="bulb-page-status">Loading bulbs...</h2> :
+                        bulbs?.length &&
+                        bulbs?.slice()
+                            .sort((a, b) => a.mac.localeCompare(b.mac))
+                            .map(bulb =>
+                                <section
+                                    className="bulb-item" key={bulb.ip}
+                                    style={{ opacity: bulb.isReachable ? 1 : 0.5 }}
                                 >
-                                    {flashingMac === bulb.mac ? "Flashing..." : "Flash Light"}
-                                </button>
-                            </section>
-                        </section>
-                    )}
+                                    {changingBulbType === bulb.mac ? (
+                                        <div
+                                            className="bulb-type-picker"
+                                            onBlur={() => setChangingBulbType(null)}
+                                            tabIndex={0}
+                                        >
+                                            {['normal', 'bulky', 'slim', 'gu10', 'vintage'].map(type => (
+                                                <img
+                                                    key={type}
+                                                    src={getBulbImg(type)}
+                                                    alt={`${type} bulb`}
+                                                    onClick={() => {
+                                                        setChangingBulbType(null);
+                                                        updateTypeMutation.mutate({ mac: bulb.mac, type });
+                                                    }}
+                                                    className={`bulb-type-option ${newType === type ? 'selected' : ''}`}
+                                                />
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <img
+                                            src={getBulbImg(bulb.type)}
+                                            alt={`${bulb.type} wiz light bulb`}
+                                            onClick={() => bulb.isReachable && changeBulbType(bulb.mac, bulb.type)}
+                                            style={{ cursor: bulb.isReachable ? 'pointer' : 'default' }}
+                                        />
+                                    )}
+                                    <section className="bulb-item-info">
+                                        {changingBulbName === bulb.mac ? (
+                                            <input
+                                                type="text"
+                                                value={newName}
+                                                onChange={(e) => setNewName(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') handleNameSubmit(bulb.mac);
+                                                    if (e.key === 'Escape') setChangingBulbName(null);
+                                                }}
+                                                onBlur={() => setChangingBulbName(null)}
+                                                autoFocus
+                                                className="bulb-name-input"
+                                            />
+                                        ) : (
+                                            <h2 className="bulb-name">
+                                                {bulb.name}
+                                                {bulb.isReachable &&
+                                                    <span
+                                                        className="bulb-name-edit-icon material-symbols-outlined"
+                                                        onClick={() => changeBulbName(bulb.mac, bulb.name)}
+                                                    > edit
+                                                    </span>
+                                                }
+                                            </h2>
+                                        )}
+                                        <h2 className="bulb-mac">
+                                            {bulb.mac.toUpperCase()}
+                                        </h2>
+                                        <button
+                                            className="bulb-flash-button"
+                                            onClick={() => flashBulb(bulb.mac)}
+                                            disabled={flashingMac.has(bulb.mac) || !bulb.isReachable}
+                                        >
+                                            {flashingMac === bulb.mac ? "Flashing..." : "Flash Light"}
+                                        </button>
+                                    </section>
+                                </section>
+                            )}
             </div>
             <button
                 className="bulbs-refresh-button"

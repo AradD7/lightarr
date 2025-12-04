@@ -10,6 +10,7 @@ import (
 
 func (cfg *config) handlerGetBulbs(w http.ResponseWriter, r *http.Request) {
 	var bulbs []*wiz.Bulb
+	cfg.UpdateBulbs(cfg.conn, cfg.bulbsMap)
 	for _, bulb := range cfg.bulbsMap {
 		bulbs = append(bulbs, bulb)
 	}
@@ -70,4 +71,29 @@ func (cfg *config) handlerRefreshBulbs(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, Resp{
 		NumNewBulbs: cfg.UpdateBulbs(cfg.conn, cfg.bulbsMap),
 	})
+}
+
+func (cfg *config) handlerUpdateBulbType(w http.ResponseWriter, r *http.Request) {
+	type parameters struct {
+		Mac  string `json:"mac"`
+		Type string `json:"type"`
+	}
+
+	var params parameters
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&params); err != nil {
+		respondWithError(w, http.StatusBadRequest, "failed to read json data", err)
+		return
+	}
+
+	if err := cfg.db.UpdateBulbType(r.Context(), database.UpdateBulbTypeParams{
+		Mac:  params.Mac,
+		Type: params.Type,
+	}); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Failed to find bulb with given mac", err)
+		return
+	}
+	cfg.bulbsMap[params.Mac].Type = params.Type
+
+	respondWithJSON(w, http.StatusOK, "Updated!")
 }

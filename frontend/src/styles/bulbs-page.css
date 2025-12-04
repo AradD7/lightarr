@@ -95,3 +95,27 @@ div.bulbs-page {
     background-color: var(--buttonHoverColor);
     cursor: pointer;
 }
+
+.bulb-type-picker {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background: white;
+    border-radius: 8px;
+}
+
+.bulb-type-option {
+    width: 50px;
+    height: 90px;
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+.bulb-type-option:hover {
+    opacity: 1;
+}
+
+.bulb-type-option.selected {
+    opacity: 1;
+    border: 2px solid blue;
+}
