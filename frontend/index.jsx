@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 
 import Navbar from "./src/pages/Navbar"
-import Rules from "./src/pages/Rules"
+import Rules from "./src/pages/Rules/Rules"
 import PlexPage from "./src/pages/PlexPage"
 import Bulbs from "./src/pages/Bulbs"
 import Welcome from "./src/pages/Welcome"

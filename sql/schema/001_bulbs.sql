@@ -3,7 +3,7 @@ CREATE TABLE bulbs (
     mac          TEXT PRIMARY KEY,
     created_at   TIMESTAMP NOT NULL,
     updated_at   TIMESTAMP NOT NULL,
-    ip           TEXT NOT NULL UNIQUE,
+    ip           TEXT NOT NULL,
     name         TEXT NOT NULL,
     is_reachable BOOLEAN NOT NULL
 );

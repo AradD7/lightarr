@@ -1,0 +1,31 @@
+.select-accounts, .select-devices {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 200px;
+}
+
+.select-accounts-header, .select-devices-header {
+    padding: 10px;
+    cursor: pointer;
+    background: #f5f5f5;
+}
+
+.select-accounts-list, .select-devices-list {
+    border-top: 1px solid #ccc;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.select-account-item, .select-device-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    height: 70px;
+}
+
+.select-account-item:hover, .select-device-item:hover {
+    background: #f0f0f0;
+}

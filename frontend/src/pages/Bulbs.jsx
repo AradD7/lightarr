@@ -124,6 +124,14 @@ export default function Bulbs() {
         }, 2900);
     }
 
+    const handleRefreshBulbs = async () => {
+        const result = await refreshBulbs();
+        if (result.data?.num > 0) {
+            // Refetch all bulbs to include the new ones
+            queryClient.invalidateQueries({ queryKey: ['bulbs'] });
+        }
+    };
+
     const changeBulbName = (mac, currentName) => {
         setChangingBulbName(mac);
         setNewName(currentName);
@@ -143,15 +151,6 @@ export default function Bulbs() {
         setNewType(currentType);
     };
 
-    const handleTypeSubmit = (mac) => {
-        if (newType.trim()) {
-            setChangingBulbType(null);
-            updateTypeMutation.mutate({ mac, type: newType.trim() });
-        } else {
-            setChangingBulbType(null);
-        }
-    };
-
     return (
         <div className="bulbs-page-contents">
             {isFetching ?
@@ -160,7 +159,9 @@ export default function Bulbs() {
                 </h1> :
                 numOfNewBulbs &&
                 <h1>
-                    {numOfNewBulbs.num === 0 ? "Found no new light bulbs on the network" : `Found and added ${numOfNewBulbs.num} new bulbs!`}
+                    {numOfNewBulbs.num === 0
+                        ? "Found no new light bulbs on the network"
+                        : `Found and added ${numOfNewBulbs.num} new ${numOfNewBulbs.num > 1 ? "bulbs" : "bulb"}!`}
                 </h1>
             }
             <div className="bulbs-page">
@@ -246,7 +247,7 @@ export default function Bulbs() {
             </div>
             <button
                 className="bulbs-refresh-button"
-                onClick={() => refreshBulbs()}
+                onClick={() => handleRefreshBulbs()}
                 disabled={isFetching}
             >
                 {isFetching ? "Searching..." : "Add Bulbs"}
