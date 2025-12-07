@@ -26,7 +26,7 @@ export default function Devices(props) {
                 className="select-devices-header"
                 onClick={() => setDevicesOpen(prev => !prev)}
             >
-                Select devices... {devicesOpen ? '▲' : '▼'}
+                Select devices... {devicesOpen ? '◀' : '▶'}
             </div>
             {devicesOpen && (
                 <div

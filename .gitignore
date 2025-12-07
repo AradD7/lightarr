@@ -30,3 +30,4 @@ go.work.sum
 
 runWindows.sh
 copyWindows.sh
+structs.json

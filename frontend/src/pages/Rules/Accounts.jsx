@@ -26,7 +26,7 @@ export default function Accounts(props) {
                 className="select-accounts-header"
                 onClick={() => setAccountsOpen(prev => !prev)}
             >
-                Select accounts... {accountsOpen ? '▲' : '▼'}
+                Select accounts... {accountsOpen ? '◀' : '▶'}
             </div>
             {accountsOpen && (
                 <div
@@ -44,8 +44,6 @@ export default function Accounts(props) {
                     ))}
                 </div>
             )}
-
         </div>
-
     )
 }

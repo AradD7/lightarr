@@ -26,7 +26,7 @@ type Bulb struct {
 }
 
 type Device struct {
-	ID      int64
+	ID      string
 	Name    string
 	Product string
 }

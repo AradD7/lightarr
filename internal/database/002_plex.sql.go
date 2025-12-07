@@ -46,7 +46,7 @@ RETURNING id, name, product
 `
 
 type AddPlexDeviceParams struct {
-	ID      int64
+	ID      string
 	Name    string
 	Product string
 }
@@ -75,7 +75,7 @@ DELETE FROM devices
 WHERE id = ?
 `
 
-func (q *Queries) DeleteDevice(ctx context.Context, id int64) error {
+func (q *Queries) DeleteDevice(ctx context.Context, id string) error {
 	_, err := q.db.ExecContext(ctx, deleteDevice, id)
 	return err
 }

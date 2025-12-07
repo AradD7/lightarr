@@ -1,8 +1,7 @@
 -- +goose Up
 CREATE TABLE devices (
-    id          INTEGER PRIMARY KEY,
-    name        TEXT NOT NULL,
-    last_seen   TEXT NOT NULL
+    id          TEXT PRIMARY KEY,
+    name        TEXT NOT NULL
 );
 
 CREATE TABLE accounts (

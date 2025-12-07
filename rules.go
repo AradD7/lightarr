@@ -12,39 +12,41 @@ import (
 )
 
 type PlexAccount struct {
-	Id		  int 	 `json:"id"`
-	Title	  string `json:"title"`
+	Id        int    `json:"id"`
+	Title     string `json:"title"`
 	Thumbnail string `json:"thumb"`
 }
 
 type PlexDevice struct {
-	Id 		 int 	`json:"id"`
-	Name   	 string `json:"name"`
-	LastSeen string `json:"lastSeenAt"`
-	Product  string `json:"product"`
+	Id      string `json:"id"`
+	Name    string `json:"name"`
+	Product string `json:"product"`
 }
 
 type PlexPayload struct {
-	Event 	string 		`json:"event"`
+	Event   string      `json:"event"`
 	Account PlexAccount `json:"Account"`
-	Player 	PlexDevice	`json:"Player"`
+	Player  struct {
+		Uuid  string `json:"uuid"`
+		Title string `json:"title"`
+	} `json:"Player"`
 }
 
 type WizAction struct {
-	Command 	[]wiz.WizCommand `json:"command"`
-	BulbsMac	[]string		 `json:"BulbsMac"`
+	Command  []wiz.WizCommand `json:"command"`
+	BulbsMac []string         `json:"BulbsMac"`
 }
 
 type RuleCondition struct {
-	Event 	[]string 		`json:"event"`
-	Account []PlexAccount	`json:"account"`
-	Player 	[]PlexDevice	`json:"player"`
+	Event   []string      `json:"event"`
+	Account []PlexAccount `json:"account"`
+	Device  []PlexDevice  `json:"player"`
 }
 
 type Rule struct {
-	Id 		  string		`json:"ruleID"`
+	Id        string        `json:"ruleID"`
 	Condition RuleCondition `json:"condition"`
-	Action 	  []WizAction	`json:"action"`
+	Action    []WizAction   `json:"action"`
 }
 
 func (cfg *config) loadRules() error {
@@ -66,9 +68,9 @@ func (cfg *config) loadRules() error {
 			continue
 		}
 		cfg.rules = append(cfg.rules, Rule{
-			Id: 		rule.ID,
-			Condition:  tempCondition,
-			Action: 	tempWizAction,
+			Id:        rule.ID,
+			Condition: tempCondition,
+			Action:    tempWizAction,
 		})
 	}
 	if len(cfg.rules) == 0 {
@@ -84,7 +86,7 @@ func (cfg *config) addRule(event []string, account []PlexAccount, player []PlexD
 	newRule.Id = uuid.New().String()
 	newRule.Condition.Account = append(newRule.Condition.Account, account...)
 	newRule.Condition.Event = append(newRule.Condition.Event, event...)
-	newRule.Condition.Player = append(newRule.Condition.Player, player...)
+	newRule.Condition.Device = append(newRule.Condition.Device, player...)
 	newRule.Action = append(newRule.Action, actions...)
 	cfg.rules = append(cfg.rules, newRule)
 
@@ -99,9 +101,9 @@ func (cfg *config) addRule(event []string, account []PlexAccount, player []PlexD
 	}
 
 	if _, err := cfg.db.AddRule(context.Background(), database.AddRuleParams{
-		ID: 		newRule.Id,
-		Condition:  string(conditionData),
-		Action: 	string(actionData),
+		ID:        newRule.Id,
+		Condition: string(conditionData),
+		Action:    string(actionData),
 	}); err != nil {
 		return fmt.Errorf("Failed to add rule to db: %s", err)
 	}
@@ -111,7 +113,7 @@ func (cfg *config) addRule(event []string, account []PlexAccount, player []PlexD
 func (cfg *config) deleteRule(id string) error {
 	for idx, rule := range cfg.rules {
 		if rule.Id == id {
-			cfg.rules = slices.Delete(cfg.rules, idx, idx + 1)
+			cfg.rules = slices.Delete(cfg.rules, idx, idx+1)
 			return cfg.db.DeleteRule(context.Background(), id)
 		}
 	}
@@ -120,18 +122,38 @@ func (cfg *config) deleteRule(id string) error {
 
 func (cfg *config) triggersRule(payload PlexPayload) ([]WizAction, string) {
 	for _, rule := range cfg.rules {
-		if slices.Contains(rule.Condition.Event, payload.Event) {
-			if slices.Contains(rule.Condition.Player, payload.Player) || len(rule.Condition.Player) == 0 {
-				if slices.Contains(rule.Condition.Account, payload.Account) || len(rule.Condition.Account) == 0 {
-					return rule.Action, rule.Id
-				}
-			}
+		if slices.Contains(rule.Condition.Event, payload.Event) && isPayloadAccountInRule(rule, payload) && isPayloadDeviceInRule(rule, payload) {
+			return rule.Action, rule.Id
 		}
 	}
 	return nil, ""
 }
 
-func (cfg *config) getBulbByBulbMac(bulbMac string) *wiz.Bulb{
+func isPayloadDeviceInRule(rule Rule, payload PlexPayload) bool {
+	if len(rule.Condition.Device) == 0 {
+		return true
+	}
+	for _, device := range rule.Condition.Device {
+		if device.Id == payload.Player.Uuid {
+			return true
+		}
+	}
+	return false
+}
+
+func isPayloadAccountInRule(rule Rule, payload PlexPayload) bool {
+	if len(rule.Condition.Account) == 0 {
+		return true
+	}
+	for _, account := range rule.Condition.Account {
+		if account.Id == payload.Account.Id {
+			return true
+		}
+	}
+	return false
+}
+
+func (cfg *config) getBulbByBulbMac(bulbMac string) *wiz.Bulb {
 	for _, bulb := range cfg.bulbsMap {
 		if bulb.Mac == bulbMac {
 			return bulb

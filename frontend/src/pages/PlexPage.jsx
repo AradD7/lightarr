@@ -260,7 +260,7 @@ export default function PlexPage() {
     const itemsToShow = showAll ? unsavedItems : (viewType === 'accounts' ? savedAccounts : savedDevices);
 
     const getStatusText = (status) => {
-        switch(status) {
+        switch (status) {
             case 'deleting': return 'Deleting...';
             case 'deleted': return 'Deleted';
             case 'adding': return 'Adding...';

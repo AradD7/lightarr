@@ -20,9 +20,9 @@ func (cfg *config) handlerGetAllAccounts(w http.ResponseWriter, r *http.Request)
 	var resp []PlexAccount
 	for _, acc := range accounts {
 		resp = append(resp, PlexAccount{
-			Id: 		int(acc.ID),
-			Title:  	acc.Title,
-			Thumbnail:  acc.Thumb.String,
+			Id:        int(acc.ID),
+			Title:     acc.Title,
+			Thumbnail: acc.Thumb.String,
 		})
 	}
 	respondWithJSON(w, http.StatusOK, resp)
@@ -37,9 +37,9 @@ func (cfg *config) handlerGetAllDevices(w http.ResponseWriter, r *http.Request) 
 	var resp []PlexDevice
 	for _, player := range players {
 		resp = append(resp, PlexDevice{
-			Id: 	  int(player.ID),
-			Name:  	  player.Name,
-			Product:  player.Product,
+			Id:      player.ID,
+			Name:    player.Name,
+			Product: player.Product,
 		})
 	}
 	respondWithJSON(w, http.StatusOK, resp)
@@ -54,10 +54,10 @@ func (cfg *config) handlerAddAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := cfg.db.AddPlexAccount(r.Context(), database.AddPlexAccountParams{
-		ID: 	int64(account.Id),
-		Title:  account.Title,
-		Thumb:  sql.NullString{
-			Valid: true,
+		ID:    int64(account.Id),
+		Title: account.Title,
+		Thumb: sql.NullString{
+			Valid:  true,
 			String: account.Thumbnail,
 		},
 	}); err != nil {
@@ -76,16 +76,15 @@ func (cfg *config) handlerAddDevice(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := cfg.db.AddPlexDevice(r.Context(), database.AddPlexDeviceParams{
-		ID:  		int64(player.Id),
-		Name: 		player.Name,
-		Product: 	player.Product,
+		ID:      player.Id,
+		Name:    player.Name,
+		Product: player.Product,
 	}); err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Failed to add device to database", err)
 		return
 	}
 	respondWithJSON(w, http.StatusOK, "Added device")
 }
-
 
 func (cfg *config) handlerDeleteAccount(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("accountId"))
@@ -101,43 +100,12 @@ func (cfg *config) handlerDeleteAccount(w http.ResponseWriter, r *http.Request) 
 }
 
 func (cfg *config) handlerDeleteDevice(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.PathValue("deviceId"))
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Id", err)
-		return
-	}
-	if err := cfg.db.DeleteDevice(r.Context(), int64(id)); err != nil {
-		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Found no player with %d id", id), err)
+	id := r.PathValue("deviceId")
+	if err := cfg.db.DeleteDevice(r.Context(), id); err != nil {
+		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Found no player with %s id", id), err)
 		return
 	}
 	respondWithJSON(w, http.StatusOK, "Deleted!")
-}
-
-func (cfg *config) handlerPlexWebhook(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseMultipartForm(10 << 20)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Failed to parse form", err)
-		return
-	}
-
-	payload := r.FormValue("payload")
-	if payload == "" {
-		respondWithError(w, http.StatusBadRequest, "No payload found", nil)
-		return
-	}
-
-	var params PlexPayload
-	if err := json.Unmarshal([]byte(payload), &params); err != nil {
-		respondWithError(w, http.StatusBadRequest, "Failed to decode JSON", err)
-		return
-	}
-
-	action, ruleId := cfg.triggersRule(params)
-	if action == nil {
-		return
-	}
-	cfg.executeActions(action)
-	fmt.Printf("Rule %s was triggered\n", ruleId)
 }
 
 func (cfg *config) handlerPlexAllAccounts(w http.ResponseWriter, r *http.Request) {
@@ -156,13 +124,13 @@ func (cfg *config) handlerPlexAllAccounts(w http.ResponseWriter, r *http.Request
 	defer resp.Body.Close()
 
 	type User struct {
-		Id 		string `xml:"id,attr"`
-		Title	string `xml:"title,attr"`
-		Thumb	string `xml:"thumb,attr"`
+		Id    string `xml:"id,attr"`
+		Title string `xml:"title,attr"`
+		Thumb string `xml:"thumb,attr"`
 	}
 	type result struct {
 		XMLName xml.Name `xml:"MediaContainer"`
-		Users []User	 `xml:"User"`
+		Users   []User   `xml:"User"`
 	}
 	var res result
 	decoder := xml.NewDecoder(resp.Body)
@@ -176,16 +144,16 @@ func (cfg *config) handlerPlexAllAccounts(w http.ResponseWriter, r *http.Request
 	for _, user := range res.Users {
 		userId, _ := strconv.Atoi(user.Id)
 		accounts = append(accounts, PlexAccount{
-			Id: 		userId,
-			Title:  	user.Title,
-			Thumbnail:  user.Thumb,
+			Id:        userId,
+			Title:     user.Title,
+			Thumbnail: user.Thumb,
 		})
 	}
 	respondWithJSON(w, http.StatusOK, accounts)
 }
 
 func (cfg *config) handlerPlexAllDevices(w http.ResponseWriter, r *http.Request) {
-	req, err := http.NewRequest("GET", "https://clients.plex.tv/devices", nil)
+	req, err := http.NewRequest("GET", "https://clients.plex.tv/api/v2/devices", nil)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Failed to create a GET request", err)
 		return
@@ -200,12 +168,27 @@ func (cfg *config) handlerPlexAllDevices(w http.ResponseWriter, r *http.Request)
 	}
 	defer resp.Body.Close()
 
-	var res []PlexDevice
+	type parameters struct {
+		ClientIdentifier string `json:"clientIdentifier"`
+		Name             string `json:"name"`
+		Product          string `json:"product"`
+	}
+
+	var params []parameters
 	decoder := json.NewDecoder(resp.Body)
-	err = decoder.Decode(&res)
+	err = decoder.Decode(&params)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Failed to decode the XML response", err)
+		respondWithError(w, http.StatusInternalServerError, "Failed to decode the json response", err)
 		return
+	}
+
+	var res []PlexDevice
+	for _, device := range params {
+		res = append(res, PlexDevice{
+			Id:      device.ClientIdentifier,
+			Name:    device.Name,
+			Product: device.Product,
+		})
 	}
 
 	respondWithJSON(w, http.StatusOK, res)

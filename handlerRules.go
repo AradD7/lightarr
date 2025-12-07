@@ -17,7 +17,7 @@ func (cfg *config) handlerAddRule(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := cfg.addRule(rule.Condition.Event, rule.Condition.Account, rule.Condition.Player, rule.Action)
+	err := cfg.addRule(rule.Condition.Event, rule.Condition.Account, rule.Condition.Device, rule.Action)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Failed to add rule", err)
 		return
