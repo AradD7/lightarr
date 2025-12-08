@@ -33,14 +33,14 @@ type PlexPayload struct {
 }
 
 type WizAction struct {
-	Command  []wiz.WizCommand `json:"command"`
-	BulbsMac []string         `json:"BulbsMac"`
+	Command  wiz.WizCommand `json:"command"`
+	BulbsMac []string       `json:"bulbsMac"`
 }
 
 type RuleCondition struct {
 	Event   []string      `json:"event"`
 	Account []PlexAccount `json:"account"`
-	Device  []PlexDevice  `json:"player"`
+	Device  []PlexDevice  `json:"device"`
 }
 
 type Rule struct {
@@ -164,14 +164,12 @@ func (cfg *config) getBulbByBulbMac(bulbMac string) *wiz.Bulb {
 
 func (cfg *config) executeActions(actions []WizAction) {
 	for _, action := range actions {
-		for _, cmd := range action.Command {
-			for _, mac := range action.BulbsMac {
-				bulb := cfg.getBulbByBulbMac(mac)
-				if bulb != nil {
-					bulb.Execute(cfg.conn, cmd)
-				} else {
-					fmt.Printf("Failed to find a bulb with id %s\n", mac)
-				}
+		for _, mac := range action.BulbsMac {
+			bulb := cfg.getBulbByBulbMac(mac)
+			if bulb != nil {
+				bulb.Execute(cfg.conn, action.Command)
+			} else {
+				fmt.Printf("Failed to find a bulb with id %s\n", mac)
 			}
 		}
 	}

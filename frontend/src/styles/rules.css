@@ -14,7 +14,8 @@
 
 .select-accounts,
 .select-devices,
-.select-events {
+.select-events,
+.select-commands {
     border: 3px solid var(--plexYellow);
     border-radius: 5px;
     width: 190px;
@@ -23,7 +24,8 @@
 
 .select-accounts-header,
 .select-devices-header,
-.select-events-header {
+.select-events-header,
+.select-commands-header {
     padding: 10px;
     cursor: pointer;
     background: var(--containerColor);
@@ -32,7 +34,8 @@
 
 .select-accounts-list,
 .select-devices-list,
-.select-events-list {
+.select-events-list,
+.select-commands-list {
     overflow-y: auto;
     position: absolute;
     transform: translate(195px, -55px);
@@ -46,7 +49,8 @@
 
 .select-account-item,
 .select-device-item,
-.select-event-item {
+.select-event-item,
+.select-command-item {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -63,7 +67,8 @@
 
 .select-account-item:hover,
 .select-device-item:hover,
-.select-event-item:hover {
+.select-event-item:hover,
+.select-command-item:hover {
     background: #f0f0f0;
 }
 
@@ -72,4 +77,55 @@
     align-items: center;
     color: var(--textInContainerColor);
     gap: 5px;
+}
+
+.command-input-container {
+    padding: 12px 16px;
+    background: var(--containerColor);
+    border-top: 1px solid var(--plexYellow);
+    color: var(--textInContainerColor);
+}
+
+.command-input-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--textInContainerColor);
+    font-size: 0.95rem;
+}
+
+.command-number-input {
+    padding: 8px;
+    border: 2px solid var(--plexYellow);
+    border-radius: 5px;
+    background: var(--containerColor);
+    color: var(--textInContainerColor);
+    font-size: 1rem;
+    width: 80px;
+}
+
+.command-number-input:focus {
+    outline: none;
+    border-color: var(--plexYellow);
+    box-shadow: 0 0 5px rgba(229, 160, 13, 0.5);
+}
+
+.rgb-inputs {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.rgb-input-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rgb-input-group label {
+    color: var(--textInContainerColor);
+    font-weight: bold;
+}
+
+.rgb-input {
+    width: 70px;
 }

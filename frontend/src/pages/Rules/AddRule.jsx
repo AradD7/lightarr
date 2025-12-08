@@ -9,6 +9,7 @@ import slimBulb from "/assets/bulbs/slimBulb.png"
 import gu10Bulb from "/assets/bulbs/gu10Bulb.png"
 import Devices from "./Devices";
 import Events from "./Events";
+import Commands from "./Commands";
 
 const fetchAccounts = async () => {
     const response = await fetch("http://localhost:10100/api/accounts");
@@ -67,6 +68,7 @@ export default function AddRule() {
             <h1>On</h1>
             <Devices data={savedDevices} />
             <h1>Do</h1>
+            <Commands />
         </div>
     )
 }
