@@ -85,7 +85,7 @@ export default function Commands() {
                 className="select-commands-header"
                 onClick={() => setCommandsOpen(prev => !prev)}
             >
-                Select commands... {commandsOpen ? '◀' : '▶'}
+                {selectedCommands.length === 0 ? "Select Commands..." : `(${selectedCommands.length}) Command${selectedCommands.length === 1 ? "" : "s"} Selected`} {commandsOpen ? '◀' : '▶'}
             </div>
             {commandsOpen && (
                 <div className="select-commands-list">

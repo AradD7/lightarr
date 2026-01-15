@@ -44,7 +44,7 @@ export default function Events() {
                 className="select-events-header"
                 onClick={() => setEventsOpen(prev => !prev)}
             >
-                Select events... {eventsOpen ? '◀' : '▶'}
+                {selectedEvents.length === 0 ? "Select Events..." : `(${selectedEvents.length}) Event${selectedEvents.length === 1 ? "" : "s"} Selected`} {eventsOpen ? '◀' : '▶'}
             </div>
             {eventsOpen && (
                 <div className="select-events-list">

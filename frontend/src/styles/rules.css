@@ -18,7 +18,8 @@
 .select-commands {
     border: 3px solid var(--plexYellow);
     border-radius: 5px;
-    width: 190px;
+    min-width: 190px;
+    width: fit-content;
     margin-bottom: 10px;
 }
 
@@ -38,7 +39,7 @@
 .select-commands-list {
     overflow-y: auto;
     position: absolute;
-    transform: translate(195px, -55px);
+    transform: translate(200px, -55px);
     background: var(--containerColor);
     border: 2px solid var(--plexYellow);
     border-radius: 10px;

@@ -26,7 +26,7 @@ export default function Accounts(props) {
                 className="select-accounts-header"
                 onClick={() => setAccountsOpen(prev => !prev)}
             >
-                Select accounts... {accountsOpen ? '◀' : '▶'}
+                {selectedAccounts.length === 0 ? "Select Accounts..." : `(${selectedAccounts.length}) Account${selectedAccounts.length === 1 ? "" : "s"} Selected`} {accountsOpen ? '◀' : '▶'}
             </div>
             {accountsOpen && (
                 <div

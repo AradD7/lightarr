@@ -10,7 +10,6 @@ import (
 
 func (cfg *config) handlerGetBulbs(w http.ResponseWriter, r *http.Request) {
 	var bulbs []*wiz.Bulb
-	cfg.UpdateBulbs(cfg.conn, cfg.bulbsMap)
 	for _, bulb := range cfg.bulbsMap {
 		bulbs = append(bulbs, bulb)
 	}
@@ -87,8 +86,7 @@ func (cfg *config) handlerUpdateBulbType(w http.ResponseWriter, r *http.Request)
 	}
 
 	if err := cfg.db.UpdateBulbType(r.Context(), database.UpdateBulbTypeParams{
-		Mac:  params.Mac,
-		Type: params.Type,
+		Mac: params.Mac,
 	}); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Failed to find bulb with given mac", err)
 		return
