@@ -39,7 +39,7 @@ const getBulbImg = (bulbType) => {
     return normalBulb;
 }
 
-export default function AddRule() {
+export default function AddRule(props) {
 
 
     const { data: bulbs, isLoading: loadingBulbs, error: errorBulbs } = useQuery({
@@ -61,14 +61,24 @@ export default function AddRule() {
         <div className="add-rule-page">
             <h1>When</h1>
             <section className="add-rule-page-line2">
-                <Accounts data={savedAccounts} />
+                <Accounts
+                    data={savedAccounts}
+                    addAccount={props.addAccount}
+                />
                 <h1>,</h1>
             </section>
-            <Events />
+            <Events
+                addEvent={props.addEvent}
+            />
             <h1>On</h1>
-            <Devices data={savedDevices} />
+            <Devices
+                data={savedDevices}
+                addDevice={props.addDevice}
+            />
             <h1>Do</h1>
-            <Commands />
+            <Commands
+                addCommand={props.addCommand}
+            />
         </div>
     )
 }

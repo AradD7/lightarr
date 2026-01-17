@@ -10,6 +10,7 @@ export default function Devices(props) {
                 ? prev.filter(id => id !== deviceId)
                 : [...prev, deviceId]
         );
+        props.addDevice(deviceId)
     };
 
     return (

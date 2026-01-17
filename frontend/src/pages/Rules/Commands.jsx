@@ -1,55 +1,82 @@
 import { useState } from "react";
 
-export default function Commands() {
+export default function Commands(props) {
     const [commandsOpen, setCommandsOpen] = useState(false);
     const [selectedCommands, setSelectedCommands] = useState([]);
-    const [dimValue, setDimValue] = useState(50);
-    const [rgbValues, setRgbValues] = useState({ r: 255, g: 255, b: 255 });
-    const [tempValue, setTempValue] = useState(4000);
 
     const commands = ["Turn off", "Turn on", "Dim", "Change Color", "Change Temperature"];
 
+    const getCommandValue = (command) => {
+        const found = selectedCommands.find(c => c.command === command);
+        return found?.value;
+    };
+
+    const isCommandSelected = (command) => {
+        return selectedCommands.some(c => c.command === command);
+    };
+
     const toggleCommand = (command) => {
         setSelectedCommands(prev => {
-            if (prev.includes(command)) {
-                return prev.filter(cmd => cmd !== command);
+            const isSelected = prev.some(c => c.command === command);
+
+            if (isSelected) {
+                return prev.filter(c => c.command !== command);
             }
 
             // If selecting "Turn off", clear all other selections
             if (command === "Turn off") {
-                return ["Turn off"];
+                return [{ command: "Turn off" }];
             }
 
             // If selecting anything else, remove "Turn off"
-            const filtered = prev.filter(cmd => cmd !== "Turn off");
+            let filtered = prev.filter(c => c.command !== "Turn off");
 
             // Handle Change Color and Change Temperature mutual exclusivity
             if (command === "Change Color") {
-                return [...filtered.filter(cmd => cmd !== "Change Temperature"), command];
+                filtered = filtered.filter(c => c.command !== "Change Temperature");
             }
             if (command === "Change Temperature") {
-                return [...filtered.filter(cmd => cmd !== "Change Color"), command];
+                filtered = filtered.filter(c => c.command !== "Change Color");
             }
 
-            return [...filtered, command];
+            // Add new command with default values
+            let newCommand;
+            if (command === "Dim") {
+                newCommand = { command, value: 50 };
+            } else if (command === "Change Color") {
+                newCommand = { command, value: { r: 255, g: 255, b: 255 } };
+            } else if (command === "Change Temperature") {
+                newCommand = { command, value: 4000 };
+            } else {
+                newCommand = { command };
+            }
+
+            return [...filtered, newCommand];
         });
+        props.addCommand(command);
+    };
+
+    const updateCommandValue = (command, value) => {
+        setSelectedCommands(prev =>
+            prev.map(c => c.command === command ? { ...c, value } : c)
+        );
     };
 
     const isCommandDisabled = (command) => {
         // Disable all commands except "Turn off" when "Turn off" is selected
-        if (command !== "Turn off" && selectedCommands.includes("Turn off")) {
+        if (command !== "Turn off" && isCommandSelected("Turn off")) {
             return true;
         }
         // Disable "Turn off" when any other command is selected
-        if (command === "Turn off" && selectedCommands.some(cmd => cmd !== "Turn off")) {
+        if (command === "Turn off" && selectedCommands.some(c => c.command !== "Turn off")) {
             return true;
         }
         // Disable "Change Color" when "Change Temperature" is selected
-        if (command === "Change Color" && selectedCommands.includes("Change Temperature")) {
+        if (command === "Change Color" && isCommandSelected("Change Temperature")) {
             return true;
         }
         // Disable "Change Temperature" when "Change Color" is selected
-        if (command === "Change Temperature" && selectedCommands.includes("Change Color")) {
+        if (command === "Change Temperature" && isCommandSelected("Change Color")) {
             return true;
         }
         return false;
@@ -58,16 +85,16 @@ export default function Commands() {
     const handleTempChange = (e) => {
         const value = parseInt(e.target.value);
         if (!isNaN(value)) {
-            setTempValue(value);
+            updateCommandValue("Change Temperature", value);
         }
     };
 
     const handleTempBlur = (e) => {
         const value = parseInt(e.target.value);
         if (isNaN(value) || value < 2200) {
-            setTempValue(2200);
+            updateCommandValue("Change Temperature", 2200);
         } else if (value > 6500) {
-            setTempValue(6500);
+            updateCommandValue("Change Temperature", 6500);
         }
     };
 
@@ -85,7 +112,7 @@ export default function Commands() {
                 className="select-commands-header"
                 onClick={() => setCommandsOpen(prev => !prev)}
             >
-                {selectedCommands.length === 0 ? "Select Commands..." : `(${selectedCommands.length}) Command${selectedCommands.length === 1 ? "" : "s"} Selected`} {commandsOpen ? '◀' : '▶'}
+                Select commands... {commandsOpen ? '◀' : '▶'}
             </div>
             {commandsOpen && (
                 <div className="select-commands-list">
@@ -100,7 +127,7 @@ export default function Commands() {
                             >
                                 <input
                                     type="checkbox"
-                                    checked={selectedCommands.includes(command)}
+                                    checked={isCommandSelected(command)}
                                     onChange={() => toggleCommand(command)}
                                     disabled={isCommandDisabled(command)}
                                 />
@@ -108,7 +135,7 @@ export default function Commands() {
                             </label>
 
                             {/* Dim input */}
-                            {command === "Dim" && selectedCommands.includes("Dim") && (
+                            {command === "Dim" && isCommandSelected("Dim") && (
                                 <div className="command-input-container">
                                     <label className="command-input-label">
                                         Brightness (1-100):
@@ -117,15 +144,18 @@ export default function Commands() {
                                         type="number"
                                         min="1"
                                         max="100"
-                                        value={dimValue}
-                                        onChange={(e) => setDimValue(Math.min(100, Math.max(1, parseInt(e.target.value) || 1)))}
+                                        value={getCommandValue("Dim") || 50}
+                                        onChange={(e) => {
+                                            const val = Math.min(100, Math.max(1, parseInt(e.target.value) || 1));
+                                            updateCommandValue("Dim", val);
+                                        }}
                                         className="command-number-input"
                                     />
                                 </div>
                             )}
 
                             {/* RGB inputs */}
-                            {command === "Change Color" && selectedCommands.includes("Change Color") && (
+                            {command === "Change Color" && isCommandSelected("Change Color") && (
                                 <div className="command-input-container">
                                     <label className="command-input-label">RGB Values:</label>
                                     <div className="rgb-inputs">
@@ -135,11 +165,12 @@ export default function Commands() {
                                                 type="number"
                                                 min="0"
                                                 max="255"
-                                                value={rgbValues.r}
-                                                onChange={(e) => setRgbValues(prev => ({
-                                                    ...prev,
-                                                    r: Math.min(255, Math.max(0, parseInt(e.target.value) || 0))
-                                                }))}
+                                                value={getCommandValue("Change Color")?.r || 255}
+                                                onChange={(e) => {
+                                                    const val = Math.min(255, Math.max(0, parseInt(e.target.value) || 0));
+                                                    const currentRGB = getCommandValue("Change Color") || { r: 255, g: 255, b: 255 };
+                                                    updateCommandValue("Change Color", { ...currentRGB, r: val });
+                                                }}
                                                 className="command-number-input rgb-input"
                                             />
                                         </div>
@@ -149,11 +180,12 @@ export default function Commands() {
                                                 type="number"
                                                 min="0"
                                                 max="255"
-                                                value={rgbValues.g}
-                                                onChange={(e) => setRgbValues(prev => ({
-                                                    ...prev,
-                                                    g: Math.min(255, Math.max(0, parseInt(e.target.value) || 0))
-                                                }))}
+                                                value={getCommandValue("Change Color")?.g || 255}
+                                                onChange={(e) => {
+                                                    const val = Math.min(255, Math.max(0, parseInt(e.target.value) || 0));
+                                                    const currentRGB = getCommandValue("Change Color") || { r: 255, g: 255, b: 255 };
+                                                    updateCommandValue("Change Color", { ...currentRGB, g: val });
+                                                }}
                                                 className="command-number-input rgb-input"
                                             />
                                         </div>
@@ -163,11 +195,12 @@ export default function Commands() {
                                                 type="number"
                                                 min="0"
                                                 max="255"
-                                                value={rgbValues.b}
-                                                onChange={(e) => setRgbValues(prev => ({
-                                                    ...prev,
-                                                    b: Math.min(255, Math.max(0, parseInt(e.target.value) || 0))
-                                                }))}
+                                                value={getCommandValue("Change Color")?.b || 255}
+                                                onChange={(e) => {
+                                                    const val = Math.min(255, Math.max(0, parseInt(e.target.value) || 0));
+                                                    const currentRGB = getCommandValue("Change Color") || { r: 255, g: 255, b: 255 };
+                                                    updateCommandValue("Change Color", { ...currentRGB, b: val });
+                                                }}
                                                 className="command-number-input rgb-input"
                                             />
                                         </div>
@@ -176,7 +209,7 @@ export default function Commands() {
                             )}
 
                             {/* Temperature input */}
-                            {command === "Change Temperature" && selectedCommands.includes("Change Temperature") && (
+                            {command === "Change Temperature" && isCommandSelected("Change Temperature") && (
                                 <div className="command-input-container">
                                     <label className="command-input-label">
                                         Temperature (2200-6500K):
@@ -185,7 +218,7 @@ export default function Commands() {
                                         type="number"
                                         min="2200"
                                         max="6500"
-                                        value={tempValue}
+                                        value={getCommandValue("Change Temperature") || 4000}
                                         onChange={handleTempChange}
                                         onBlur={handleTempBlur}
                                         className="command-number-input"

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function Events() {
+export default function Events(props) {
     const [eventsOpen, setEventsOpen] = useState(false);
     const [selectedEvents, setSelectedEvents] = useState([]);
     const events = ["media.pause", "media.stop", "media.play", "media.resume"];
@@ -11,6 +11,7 @@ export default function Events() {
                 ? prev.filter(id => id !== event)
                 : [...prev, event]
         );
+        props.addEvent(event);
     };
 
     const isEventDisabled = (event) => {

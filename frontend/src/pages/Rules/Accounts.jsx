@@ -10,6 +10,7 @@ export default function Accounts(props) {
                 ? prev.filter(id => id !== accountId)
                 : [...prev, accountId]
         );
+        props.addAccount(accountId);
     };
 
     return (
