@@ -15,6 +15,7 @@
 .select-accounts,
 .select-devices,
 .select-events,
+.select-bulbsMacs,
 .select-commands {
     border: 3px solid var(--plexYellow);
     border-radius: 5px;
@@ -26,6 +27,7 @@
 .select-accounts-header,
 .select-devices-header,
 .select-events-header,
+.select-bulbsMacs-header,
 .select-commands-header {
     padding: 10px;
     cursor: pointer;
@@ -36,6 +38,7 @@
 .select-accounts-list,
 .select-devices-list,
 .select-events-list,
+.select-bulbsMacs-list,
 .select-commands-list {
     overflow-y: auto;
     position: absolute;
@@ -51,6 +54,7 @@
 .select-account-item,
 .select-device-item,
 .select-event-item,
+.select-bulbsMacs-item,
 .select-command-item {
     display: flex;
     justify-content: center;
@@ -69,6 +73,7 @@
 .select-account-item:hover,
 .select-device-item:hover,
 .select-event-item:hover,
+.select-bulbsMacs-item:hover,
 .select-command-item:hover {
     background: #f0f0f0;
 }

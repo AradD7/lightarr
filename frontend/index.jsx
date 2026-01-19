@@ -7,6 +7,7 @@ import Rules from "./src/pages/Rules/Rules"
 import PlexPage from "./src/pages/PlexPage"
 import Bulbs from "./src/pages/Bulbs"
 import Welcome from "./src/pages/Welcome"
+import AddRule from "./src/pages/Rules/AddRule"
 
 function App() {
     return (
@@ -16,6 +17,7 @@ function App() {
                     <Route index element={<Welcome />} />
 
                     <Route path="Rules" element={<Rules />} />
+                    <Route path="AddRules" element={<AddRule />} />
                     <Route path="PlexInfo" element={<PlexPage />} />
                     <Route path="Bulbs" element={<Bulbs />} />
                 </Route>
