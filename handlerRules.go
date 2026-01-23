@@ -2,8 +2,21 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 )
+
+func (cfg *config) handlerPrintRule(w http.ResponseWriter, r *http.Request) {
+	var rule Rule
+	decoder := json.NewDecoder(r.Body)
+	log.Println(r.Body)
+	if err := decoder.Decode(&rule); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Failed to unmarshal json", err)
+		return
+	}
+	log.Println(rule)
+	respondWithJSON(w, http.StatusOK, "Rule Printed!")
+}
 
 func (cfg *config) handlerGetAllRules(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, cfg.rules)

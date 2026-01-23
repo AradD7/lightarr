@@ -4,6 +4,9 @@ export default function Welcome() {
             <h1>
                 Welcome to Lightarr!
             </h1>
+            <h2>
+                Open a tab to get started
+            </h2>
         </div>
     )
 }

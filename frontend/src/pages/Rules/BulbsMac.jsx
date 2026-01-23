@@ -15,7 +15,7 @@ export default function BulbsMac(props) {
 
     return (
         <div
-            className="select-bulbsMacs"
+            className={props.isEmpty && selectedBulbsMacs.length === 0 ? "select-bulbsMacs-empty" : "select-bulbsMacs"}
             onBlur={(e) => {
                 if (!e.currentTarget.contains(e.relatedTarget)) {
                     setBulbsMacsOpen(false);

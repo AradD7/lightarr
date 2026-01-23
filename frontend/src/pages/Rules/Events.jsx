@@ -33,7 +33,7 @@ export default function Events(props) {
 
     return (
         <div
-            className="select-events"
+            className={props.isEmpty && selectedEvents.length === 0 ? "select-events-empty" : "select-events"}
             onBlur={(e) => {
                 if (!e.currentTarget.contains(e.relatedTarget)) {
                     setEventsOpen(false);

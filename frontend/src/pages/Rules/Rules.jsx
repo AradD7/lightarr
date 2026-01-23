@@ -14,13 +14,20 @@ export default function Rules() {
         queryKey: ['rules'],
         queryFn: fetchRules,
     });
+    console.log(rules)
+
+    const rulesToDisplay = rules?.map((rule, idx) => (
+        <section key={rule.ruleID} className="rule-item">
+            <h1>
+                Rule {rule.ruleID}
+            </h1>
+        </section>
+    ))
 
     return (
         <div className="rules-page">
             <section className="current-rules">
-                <h2>
-                    {rules ? rules : "Found no rules. Click below to add some."}
-                </h2>
+                {rules ? rulesToDisplay : <h2>"Found no rules. Click below to add some."</h2>}
             </section>
             <button
                 className="add-rule-button add-button"

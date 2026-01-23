@@ -1,17 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import Accounts from "./Accounts";
-
-import normalBulb from "/assets/bulbs/normalBulb.png"
-import bulkyBulb from "/assets/bulbs/bulkyBulb.png"
-import vintageBulb from "/assets/bulbs/vintageBulb.png"
-import slimBulb from "/assets/bulbs/slimBulb.png"
-import gu10Bulb from "/assets/bulbs/gu10Bulb.png"
 import Devices from "./Devices";
 import Events from "./Events";
 import Commands from "./Commands";
 import BulbsMac from "./BulbsMac";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const fetchAccounts = async () => {
     const response = await fetch("http://localhost:10100/api/accounts");
@@ -31,12 +26,65 @@ const fetchAllBulbs = async () => {
     return response.json();
 }
 
+const addRule = async ({ accounts, devices, events, commands, macs }) => {
+    const data = {
+        condition: {
+            event: events,
+            account: accounts.map(acc => ({
+                id: acc,
+            })),
+            device: devices.map(dev => ({
+                id: dev,
+            })),
+        },
+        action: [{
+            command: {
+                method: "setPilot",
+                params: {},
+            },
+            bulbsMac: macs,
+        }]
+    }
+    commands.forEach(cmd => {
+        switch (cmd.command) {
+            case "Turn off":
+                data.action[0].command.params.state = false;
+                break;
+            case "Turn on":
+                data.action[0].command.params.state = true;
+                break;
+            case "Dim":
+                data.action[0].command.params.dimming = cmd.value;
+                break;
+            case "Change Color":
+                data.action[0].command.params.r = cmd.value.r;
+                data.action[0].command.params.g = cmd.value.g;
+                data.action[0].command.params.b = cmd.value.b;
+                break;
+            case "Change Temperature":
+                data.action[0].command.params.temp = cmd.value;
+                break;
+        }
+    });
+    const response = await fetch("http://localhost:10100/api/rules", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to add rule');
+    return response.json();
+}
+
 export default function AddRule() {
+    const navigate = useNavigate()
     const [selectedAccounts, setSelectedAccounts] = useState([]);
     const [selectedDevices, setSelectedDevices] = useState([]);
     const [selectedEvents, setSelectedEvents] = useState([]);
     const [selectedCommands, setSelectedCommands] = useState([]);
     const [selectedBulbsMacs, setSelectedBulbsMacs] = useState([]);
+    const [isEmpty, setIsEmpty] = useState(false);
 
     const { data: bulbs, isLoading: loadingBulbs, error: errorBulbs } = useQuery({
         queryKey: ['bulbs'],
@@ -124,43 +172,72 @@ export default function AddRule() {
         );
     };
 
+    const addRuleMutation = useMutation({
+        mutationFn: addRule,
+        onSuccess: () => {
+            console.log("Success!")
+        }
+    });
+
     const handleAddRule = () => {
-        console.log(selectedAccounts, selectedEvents, selectedDevices, selectedCommands, selectedBulbsMacs)
+        if (selectedCommands.length === 0 || selectedBulbsMacs.length === 0 || selectedEvents.length === 0) {
+            setIsEmpty(true);
+            return;
+        }
+        addRuleMutation.mutate({
+            accounts: selectedAccounts,
+            devices: selectedDevices,
+            events: selectedEvents,
+            commands: selectedCommands,
+            macs: selectedBulbsMacs
+        });
     }
 
     return (
-        <div className="add-rule-page">
-            <h1>When</h1>
-            <section className="add-rule-page-line2">
-                <Accounts
-                    data={savedAccounts}
-                    addAccount={toggleAccount}
+        <>
+            {isEmpty ? <h2>Cannot leave the following empty.</h2> : null}
+            <div className="add-rule-page">
+                <h1>When</h1>
+                <section className="add-rule-page-line2">
+                    <Accounts
+                        data={savedAccounts}
+                        addAccount={toggleAccount}
+                    />
+                    <h1>,</h1>
+                </section>
+                <section onClick={() => setIsEmpty(false)}>
+                    <Events
+                        addEvent={toggleEvent}
+                        isEmpty={isEmpty}
+                    />
+                </section>
+                <h1>On</h1>
+                <Devices
+                    data={savedDevices}
+                    addDevice={toggleDevice}
                 />
-                <h1>,</h1>
-            </section>
-            <Events
-                addEvent={toggleEvent}
-            />
-            <h1>On</h1>
-            <Devices
-                data={savedDevices}
-                addDevice={toggleDevice}
-            />
-            <h1>Do</h1>
-            <Commands
-                addCommand={toggleCommand}
-            />
-            <h1>To</h1>
-            <BulbsMac
-                data={bulbs}
-                addBulbsMac={toggleBulbsMac}
-            />
-            <button
-                className="add-rule-button add-button"
-                onClick={handleAddRule}
-            >
-                Add Rule
-            </button>
-        </div>
+                <h1>Do</h1>
+                <section onClick={() => setIsEmpty(false)}>
+                    <Commands
+                        addCommand={toggleCommand}
+                        isEmpty={isEmpty}
+                    />
+                </section>
+                <h1>To</h1>
+                <section onClick={() => setIsEmpty(false)}>
+                    <BulbsMac
+                        data={bulbs}
+                        addBulbsMac={toggleBulbsMac}
+                        isEmpty={isEmpty}
+                    />
+                </section>
+                <button
+                    className="add-rule-button add-button"
+                    onClick={handleAddRule}
+                >
+                    Add Rule
+                </button>
+            </div>
+        </>
     )
 }

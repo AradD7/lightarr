@@ -100,7 +100,7 @@ export default function Commands(props) {
 
     return (
         <div
-            className="select-commands"
+            className={props.isEmpty && selectedCommands.length === 0 ? "select-commands-empty" : "select-commands"}
             onBlur={(e) => {
                 if (!e.currentTarget.contains(e.relatedTarget)) {
                     setCommandsOpen(false);
