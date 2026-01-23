@@ -18,10 +18,12 @@ export default function Rules() {
     return (
         <div className="rules-page">
             <section className="current-rules">
-                {rules ? rules : "Found no rules. Click the button to add some."}
+                <h2>
+                    {rules ? rules : "Found no rules. Click below to add some."}
+                </h2>
             </section>
             <button
-                className="add-rule-button"
+                className="add-rule-button add-button"
                 onClick={() => navigate("/AddRules")}
             >
                 Add a Rule

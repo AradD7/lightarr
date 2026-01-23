@@ -156,7 +156,7 @@ export default function AddRule() {
                 addBulbsMac={toggleBulbsMac}
             />
             <button
-                className="add-rule-button"
+                className="add-rule-button add-button"
                 onClick={handleAddRule}
             >
                 Add Rule

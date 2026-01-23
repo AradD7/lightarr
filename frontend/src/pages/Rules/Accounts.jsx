@@ -33,16 +33,19 @@ export default function Accounts(props) {
                 <div
                     className="select-accounts-list"
                 >
-                    {props.data.map(account => (
-                        <label key={account.id} className="select-account-item">
-                            <input
-                                type="checkbox"
-                                checked={selectedAccounts.includes(account.id)}
-                                onChange={() => toggleAccount(account.id)}
-                            />
-                            {account.title}
-                        </label>
-                    ))}
+                    {props.data ?
+                        props.data.map(account => (
+                            <label key={account.id} className="select-account-item">
+                                <input
+                                    type="checkbox"
+                                    checked={selectedAccounts.includes(account.id)}
+                                    onChange={() => toggleAccount(account.id)}
+                                />
+                                {account.title}
+                            </label>
+                        ))
+                        : <section className="rules-empty-array">No Accounts Saved</section>
+                    }
                 </div>
             )}
         </div>

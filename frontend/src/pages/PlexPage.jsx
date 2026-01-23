@@ -352,7 +352,7 @@ export default function PlexPage() {
                 )}
             </div>
 
-            <button className="plex-add-button" onClick={() => setShowAll(!showAll)}>
+            <button className="plex-add-button add-button" onClick={() => setShowAll(!showAll)}>
                 {showAll
                     ? `View Saved ${viewType === 'accounts' ? 'Accounts' : 'Devices'}`
                     : `View All ${viewType === 'accounts' ? 'Accounts' : 'Devices'}`

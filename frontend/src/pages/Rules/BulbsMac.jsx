@@ -33,16 +33,19 @@ export default function BulbsMac(props) {
                 <div
                     className="select-bulbsMacs-list"
                 >
-                    {props.data.map(bulbsMac => (
-                        <label key={bulbsMac.mac} className="select-bulbsMacs-item">
-                            <input
-                                type="checkbox"
-                                checked={selectedBulbsMacs.includes(bulbsMac.mac)}
-                                onChange={() => toggleBulbsMac(bulbsMac.mac)}
-                            />
-                            {bulbsMac.name}
-                        </label>
-                    ))}
+                    {props.data ?
+                        props.data.map(bulbsMac => (
+                            <label key={bulbsMac.mac} className="select-bulbsMacs-item">
+                                <input
+                                    type="checkbox"
+                                    checked={selectedBulbsMacs.includes(bulbsMac.mac)}
+                                    onChange={() => toggleBulbsMac(bulbsMac.mac)}
+                                />
+                                {bulbsMac.name}
+                            </label>
+                        ))
+                        : <section className="rules-empty-array">No Bulbs Found. Head to Bulbs tab.</section>
+                    }
                 </div>
             )}
 

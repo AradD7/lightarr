@@ -246,11 +246,11 @@ export default function Bulbs() {
                             )}
             </div>
             <button
-                className="bulbs-refresh-button"
+                className="bulbs-refresh-button add-button"
                 onClick={() => handleRefreshBulbs()}
                 disabled={isFetching}
             >
-                {isFetching ? "Searching..." : "Add Bulbs"}
+                {isFetching ? "Searching..." : "Find More Bulbs"}
             </button>
         </div>
     )

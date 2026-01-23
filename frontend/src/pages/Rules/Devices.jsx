@@ -33,16 +33,20 @@ export default function Devices(props) {
                 <div
                     className="select-devices-list"
                 >
-                    {props.data.map(device => (
-                        <label key={device.id} className="select-device-item">
-                            <input
-                                type="checkbox"
-                                checked={selectedDevices.includes(device.id)}
-                                onChange={() => toggleDevice(device.id)}
-                            />
-                            {device.name}
-                        </label>
-                    ))}
+                    {
+                        props.data ?
+                            props.data.map(device => (
+                                <label key={device.id} className="select-device-item">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedDevices.includes(device.id)}
+                                        onChange={() => toggleDevice(device.id)}
+                                    />
+                                    {device.name}
+                                </label>
+                            ))
+                            : <section className="rules-empty-array">No Devices Saved</section>
+                    }
                 </div>
             )}
 

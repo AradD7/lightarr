@@ -1,3 +1,11 @@
+.rules-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    flex-direction: column;
+}
+
 .add-rule-page {
     margin-top: 50px;
     display: flex;
@@ -134,4 +142,10 @@
 
 .rgb-input {
     width: 70px;
+}
+
+.rules-empty-array {
+    padding: 8px 10px;
+    color: var(--textInContainerColor);
+    font-size: 1.1rem;
 }

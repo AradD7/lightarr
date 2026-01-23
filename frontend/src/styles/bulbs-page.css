@@ -6,7 +6,7 @@ div.bulbs-page-contents {
     flex-direction: column;
 }
 
-div.bulbs-page-contents > h1 {
+div.bulbs-page-contents>h1 {
     text-align: center;
     color: var(--plexYellow);
     font-weight: 800;
@@ -36,7 +36,7 @@ div.bulbs-page {
     border-radius: 20px;
 }
 
-.bulb-item > img {
+.bulb-item>img {
     height: 150px;
     border-radius: 20px;
 }
@@ -50,13 +50,13 @@ div.bulbs-page {
     gap: 20px;
 }
 
-.bulb-item-info > h2.bulb-name {
+.bulb-item-info>h2.bulb-name {
     margin: 0;
     color: var(--textInContainerColor);
     font-size: 1.5rem;
 }
 
-.bulb-item-info > h2.bulb-mac {
+.bulb-item-info>h2.bulb-mac {
     margin: 0;
     color: var(--textInContainerColor);
     font-size: 1.2rem;
@@ -75,23 +75,6 @@ div.bulbs-page {
 }
 
 .bulb-flash-button:hover:not(:disabled) {
-    background-color: var(--buttonHoverColor);
-    cursor: pointer;
-}
-
-.bulbs-refresh-button {
-    font-family: "IBM Plex Sans", sans-serif;
-    width: 300px;
-    height: 60px;
-    background-color: var(--plexYellow);
-    border: none;
-    border-radius: 35px;
-    font-size: 2.1rem;
-    font-weight: 800;
-    transition: background-color 0.1s ease;
-}
-
-.bulbs-refresh-button:hover:not(:disabled) {
     background-color: var(--buttonHoverColor);
     cursor: pointer;
 }

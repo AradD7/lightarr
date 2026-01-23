@@ -1,4 +1,4 @@
-:root{
+:root {
     --backgroundColor: #202020;
     --textColorDark: #080909;
     --plexYellow: #E5B93C;
@@ -25,6 +25,28 @@ body {
     align-items: center;
 }
 
+.add-button {
+    font-family: "IBM Plex Sans", sans-serif;
+    width: fit-content;
+    height: 45px;
+    background-color: var(--plexYellow);
+    border: none;
+    border-radius: 25px;
+    font-size: 1.4rem;
+    font-weight: 800;
+    transition: background-color 0.1s ease;
+    padding: 0 10px;
+}
+
+.add-button:hover {
+    background-color: var(--buttonHoverColor);
+    cursor: pointer;
+}
+
+h2 {
+    color: var(--textInContainerColor);
+}
+
 a {
     text-decoration: none;
 }
@@ -48,7 +70,7 @@ div.nav-links {
     gap: 30px;
 }
 
-div.nav-links > a {
+div.nav-links>a {
     font-size: 2rem;
     padding: 10px 0;
     width: 33%;
@@ -57,11 +79,11 @@ div.nav-links > a {
     transition: background-color 0.15s ease;
 }
 
-div.nav-links > a:hover {
+div.nav-links>a:hover {
     background-color: var(--buttonHoverColor);
 }
 
-div.nav-links > a.active {
+div.nav-links>a.active {
     background-color: var(--plexYellow);
     cursor: default;
 }

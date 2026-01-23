@@ -11,7 +11,7 @@
     display: inline-block;
 }
 
-.header-with-dropdown > h1 {
+.header-with-dropdown>h1 {
     text-align: center;
     color: var(--plexYellow);
     font-weight: 800;
@@ -76,10 +76,6 @@ div.accounts {
     gap: 50px 70px;
 }
 
-div.accounts > h2 {
-    color: var(--textInContainerColor);
-}
-
 .account-item {
     position: relative;
     width: 170px;
@@ -92,7 +88,7 @@ div.accounts > h2 {
     border-radius: 10px;
 }
 
-.account-item > h1 {
+.account-item>h1 {
     padding-top: 10px;
     margin: 0;
     color: var(--textInContainerColor);
@@ -101,7 +97,7 @@ div.accounts > h2 {
     font-size: 1.4rem;
 }
 
-.account-item > img {
+.account-item>img {
     width: 130px;
     padding: 0;
     margin: 0;
@@ -136,24 +132,6 @@ span.account-add-icon {
 
 span.material-symbols-outlined:hover {
     font-weight: 600;
-    cursor: pointer;
-}
-
-.plex-add-button {
-    font-family: "IBM Plex Sans", sans-serif;
-    width: fit-content;
-    height: 45px;
-    background-color: var(--plexYellow);
-    border: none;
-    border-radius: 5px;
-    font-size: 1.3rem;
-    font-weight: 800;
-    transition: background-color 0.1s ease;
-    padding: 0 10px;
-}
-
-.plex-add-button:hover {
-    background-color: var(--buttonHoverColor);
     cursor: pointer;
 }
 
