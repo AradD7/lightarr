@@ -134,3 +134,29 @@ func (q *Queries) GetAllDevices(ctx context.Context) ([]Device, error) {
 	}
 	return items, nil
 }
+
+const getPlexAccountById = `-- name: GetPlexAccountById :one
+
+SELECT id, title, thumb FROM accounts
+WHERE id = ?
+`
+
+func (q *Queries) GetPlexAccountById(ctx context.Context, id int64) (Account, error) {
+	row := q.db.QueryRowContext(ctx, getPlexAccountById, id)
+	var i Account
+	err := row.Scan(&i.ID, &i.Title, &i.Thumb)
+	return i, err
+}
+
+const getPlexDeviceById = `-- name: GetPlexDeviceById :one
+
+SELECT id, name, product FROM devices
+WHERE id = ?
+`
+
+func (q *Queries) GetPlexDeviceById(ctx context.Context, id string) (Device, error) {
+	row := q.db.QueryRowContext(ctx, getPlexDeviceById, id)
+	var i Device
+	err := row.Scan(&i.ID, &i.Name, &i.Product)
+	return i, err
+}

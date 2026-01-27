@@ -35,3 +35,13 @@ WHERE id = ?;
 DELETE FROM accounts
 WHERE id = ?;
 --
+
+-- name: GetPlexDeviceById :one
+SELECT * FROM devices
+WHERE id = ?;
+--
+
+-- name: GetPlexAccountById :one
+SELECT * FROM accounts
+WHERE id = ?;
+--
