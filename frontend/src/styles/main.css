@@ -6,6 +6,7 @@
     --containerColor: #1A1A1A;
     --textInContainerColor: #C7CFFC;
     --iconColor: #C7CFFC;
+    --headerBlue: #143CFC;
 }
 
 * {
@@ -65,7 +66,7 @@ a:visited {
 .nav-header {
     width: 90vw;
     max-width: 1000px;
-    background-color: #143CFC;
+    background-color: var(--headerBlue);
     border-radius: 50px;
 }
 

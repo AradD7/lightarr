@@ -78,12 +78,13 @@ export default function Rules() {
 
     const rulesToDisplay = rules?.map(rule => (
         <div key={rule.ruleID} className="rule-item">
-            <section className="rule-header">            <span
-                className="material-symbols-outlined rule-arrow rule-more"
-                onClick={() => handleRuleMore(rule.ruleID)}
-            >
-                arrow_drop_down
-            </span>
+            <section className="rule-header">
+                <span
+                    className="material-symbols-outlined rule-arrow rule-more"
+                    onClick={() => handleRuleMore(rule.ruleID)}
+                >
+                    arrow_drop_down
+                </span>
                 <h1
                     className="rule-more"
                     onClick={() => handleRuleMore(rule.ruleID)}
@@ -100,7 +101,7 @@ export default function Rules() {
             <section
                 className={rulesToShow.includes(rule.ruleID) ? "rule-description-show" : "rule-description-hide"}
             >
-                <h2>When</h2>
+                <h2>When User{!rule.condition.account || rule.condition.account.length <= 1 ? "" : "s"}:</h2>
                 <section className="rule-accounts">
                     {!rule.condition.account ? <h3>Any</h3> : rule.condition.account.map(acc => (
                         <h3
@@ -111,6 +112,7 @@ export default function Rules() {
                         </h3>
                     ))}
                 </section>
+                <h2>Do{!rule.condition.account || rule.condition.account.length <= 1 ? "es" : ""} Event{rule.condition.event.length === 1 ? "" : "s"}:</h2>
                 <section className="rule-events">
                     {rule.condition.event.map((evnt, idx) => (
                         <h2
@@ -121,7 +123,7 @@ export default function Rules() {
                         </h2>
                     ))}
                 </section>
-                <h2>On</h2>
+                <h2>On Device{!rule.condition.device || rule.condition.device.length <= 1 ? "" : "s"}:</h2>
                 <section className="rule-devices">
                     {!rule.condition.account ? <h3>Any</h3> : rule.condition.device.map(dev => (
                         <h3
@@ -132,8 +134,8 @@ export default function Rules() {
                         </h3>
                     ))}
                 </section>
-                <h2>Do:</h2>
-                <section className="rule-command">
+                <h2>Perform Command{paramsToArray(rule.action[0].command.params).length === 1 ? "" : "s"}:</h2>
+                <section className="rule-commands">
                     {paramsToArray(rule.action[0].command.params).map((cmd, idx) => (
                         <h3
                             key={idx}
@@ -143,8 +145,8 @@ export default function Rules() {
                         </h3>
                     ))}
                 </section>
-                <h2>To:</h2>
-                <section className="rule-bulbsMac">
+                <h2>To Bulb{rule.action[0].bulbsMac.length === 1 ? "" : "s"}:</h2>
+                <section className="rule-bulbsMacs">
                     {rule.action[0].bulbsMac.map(mac => (
                         <h3
                             key={mac}

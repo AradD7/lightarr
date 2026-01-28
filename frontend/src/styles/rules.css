@@ -160,6 +160,10 @@
     font-size: 1.1rem;
 }
 
+.add-rule-button {
+    margin-top: 15px;
+}
+
 .add-rule-command-section {
     display: flex;
     justify-content: center;
@@ -208,4 +212,59 @@
 
 .rule-description-hide {
     display: none;
+}
+
+.rule-description-show {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.rule-description-show>h2 {
+    font-size: 1.8rem;
+    margin: 0;
+    color: var(--headerBlue);
+}
+
+.rule-devices,
+.rule-accounts,
+.rule-commands,
+.rule-bulbsMacs {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.rule-devices>h3,
+.rule-accounts>h3,
+.rule-commands>h3,
+.rule-bulbsMacs>h3 {
+    font-size: 1.2rem;
+    color: var(--textInContainerColor);
+    margin: 10px 0;
+    padding-right: 10px;
+}
+
+.rule-devices>h3:not(:last-child),
+.rule-accounts>h3:not(:last-child),
+.rule-commands>h3:not(:last-child),
+.rule-bulbsMacs>h3:not(:last-child) {
+    border-right: 2px solid var(--plexYellow);
+}
+
+.rule-events {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-right: 2px solid var(--plexYellow);
+    border-left: 2px solid var(--plexYellow);
+    margin: 10px 0;
+}
+
+.rule-events>h2 {
+    font-size: 1.5rem;
+    margin: 0;
+    padding: 0 5px;
 }
