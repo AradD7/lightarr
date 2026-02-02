@@ -16,6 +16,12 @@ const deleteRule = async (id) => {
     return response.json();
 };
 
+const fetchAllBulbs = async () => {
+    const response = await fetch("http://localhost:10100/api/bulbs");
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+}
+
 export default function Rules() {
     const [rulesToShow, setRulesToShow] = useState([]);
 
@@ -25,6 +31,11 @@ export default function Rules() {
     const { data: rules, isLoading: loadingRules, error: errorRules } = useQuery({
         queryKey: ['rules'],
         queryFn: fetchRules,
+    });
+
+    const { data: allBulbs, isLoading: loadingAllBulbs, error: errorBulbs } = useQuery({
+        queryKey: ['bulbs'],
+        queryFn: fetchAllBulbs,
     });
 
     const deleteRuleMutation = useMutation({
@@ -152,7 +163,7 @@ export default function Rules() {
                             key={mac}
                             className="rule-bulbsMac-item"
                         >
-                            {mac}
+                            {allBulbs.find(bulb => bulb.mac === mac).name}{` (${mac})`}
                         </h3>
                     ))}
                 </section>
