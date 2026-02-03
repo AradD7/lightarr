@@ -2,64 +2,16 @@ import { useState } from "react";
 
 export default function Commands(props) {
     const [commandsOpen, setCommandsOpen] = useState(false);
-    const [selectedCommands, setSelectedCommands] = useState([]);
 
     const commands = ["Turn off", "Turn on", "Dim", "Change Color", "Change Temperature"];
 
     const getCommandValue = (command) => {
-        const found = selectedCommands.find(c => c.command === command);
+        const found = props.selectedCommands.find(c => c.command === command);
         return found?.value;
     };
 
     const isCommandSelected = (command) => {
-        return selectedCommands.some(c => c.command === command);
-    };
-
-    const toggleCommand = (command) => {
-        setSelectedCommands(prev => {
-            const isSelected = prev.some(c => c.command === command);
-
-            if (isSelected) {
-                return prev.filter(c => c.command !== command);
-            }
-
-            // If selecting "Turn off", clear all other selections
-            if (command === "Turn off") {
-                return [{ command: "Turn off" }];
-            }
-
-            // If selecting anything else, remove "Turn off"
-            let filtered = prev.filter(c => c.command !== "Turn off");
-
-            // Handle Change Color and Change Temperature mutual exclusivity
-            if (command === "Change Color") {
-                filtered = filtered.filter(c => c.command !== "Change Temperature");
-            }
-            if (command === "Change Temperature") {
-                filtered = filtered.filter(c => c.command !== "Change Color");
-            }
-
-            // Add new command with default values
-            let newCommand;
-            if (command === "Dim") {
-                newCommand = { command, value: 50 };
-            } else if (command === "Change Color") {
-                newCommand = { command, value: { r: 255, g: 255, b: 255 } };
-            } else if (command === "Change Temperature") {
-                newCommand = { command, value: 4000 };
-            } else {
-                newCommand = { command };
-            }
-
-            return [...filtered, newCommand];
-        });
-        props.addCommand(command);
-    };
-
-    const updateCommandValue = (command, value) => {
-        setSelectedCommands(prev =>
-            prev.map(c => c.command === command ? { ...c, value } : c)
-        );
+        return props.selectedCommands.some(c => c.command === command);
     };
 
     const isCommandDisabled = (command) => {
@@ -68,7 +20,7 @@ export default function Commands(props) {
             return true;
         }
         // Disable "Turn off" when any other command is selected
-        if (command === "Turn off" && selectedCommands.some(c => c.command !== "Turn off")) {
+        if (command === "Turn off" && props.selectedCommands.some(c => c.command !== "Turn off")) {
             return true;
         }
         // Disable "Change Color" when "Change Temperature" is selected
@@ -85,22 +37,22 @@ export default function Commands(props) {
     const handleTempChange = (e) => {
         const value = parseInt(e.target.value);
         if (!isNaN(value)) {
-            updateCommandValue("Change Temperature", value);
+            props.updateCommandValue("Change Temperature", value);
         }
     };
 
     const handleTempBlur = (e) => {
         const value = parseInt(e.target.value);
         if (isNaN(value) || value < 2200) {
-            updateCommandValue("Change Temperature", 2200);
+            props.updateCommandValue("Change Temperature", 2200);
         } else if (value > 6500) {
-            updateCommandValue("Change Temperature", 6500);
+            props.updateCommandValue("Change Temperature", 6500);
         }
     };
 
     return (
         <div
-            className={props.isEmpty && selectedCommands.length === 0 ? "select-commands-empty" : "select-commands"}
+            className={props.isEmpty && props.selectedCommands.length === 0 ? "select-commands-empty" : "select-commands"}
             onBlur={(e) => {
                 if (!e.currentTarget.contains(e.relatedTarget)) {
                     setCommandsOpen(false);
@@ -112,7 +64,7 @@ export default function Commands(props) {
                 className="select-commands-header"
                 onClick={() => setCommandsOpen(prev => !prev)}
             >
-                {selectedCommands.length === 0 ? "Select Commands..." : `(${selectedCommands.length}) Comands${selectedCommands.length === 1 ? "" : "s"} Selected`} {commandsOpen ? '◀' : '▶'}
+                {props.selectedCommands.length === 0 ? "Select Commands..." : `(${props.selectedCommands.length}) Command${props.selectedCommands.length === 1 ? "" : "s"} Selected`} {commandsOpen ? '◀' : '▶'}
             </div>
             {commandsOpen && (
                 <div className="select-commands-list">
@@ -128,7 +80,7 @@ export default function Commands(props) {
                                 <input
                                     type="checkbox"
                                     checked={isCommandSelected(command)}
-                                    onChange={() => toggleCommand(command)}
+                                    onChange={() => props.addCommand(command)}
                                     disabled={isCommandDisabled(command)}
                                 />
                                 {command}
@@ -147,7 +99,7 @@ export default function Commands(props) {
                                         value={getCommandValue("Dim") || 50}
                                         onChange={(e) => {
                                             const val = Math.min(100, Math.max(1, parseInt(e.target.value) || 1));
-                                            updateCommandValue("Dim", val);
+                                            props.updateCommandValue("Dim", val);
                                         }}
                                         className="command-number-input"
                                     />
@@ -169,7 +121,7 @@ export default function Commands(props) {
                                                 onChange={(e) => {
                                                     const val = Math.min(255, Math.max(0, parseInt(e.target.value) || 0));
                                                     const currentRGB = getCommandValue("Change Color") || { r: 255, g: 255, b: 255 };
-                                                    updateCommandValue("Change Color", { ...currentRGB, r: val });
+                                                    props.updateCommandValue("Change Color", { ...currentRGB, r: val });
                                                 }}
                                                 className="command-number-input rgb-input"
                                             />
@@ -184,7 +136,7 @@ export default function Commands(props) {
                                                 onChange={(e) => {
                                                     const val = Math.min(255, Math.max(0, parseInt(e.target.value) || 0));
                                                     const currentRGB = getCommandValue("Change Color") || { r: 255, g: 255, b: 255 };
-                                                    updateCommandValue("Change Color", { ...currentRGB, g: val });
+                                                    props.updateCommandValue("Change Color", { ...currentRGB, g: val });
                                                 }}
                                                 className="command-number-input rgb-input"
                                             />
@@ -199,7 +151,7 @@ export default function Commands(props) {
                                                 onChange={(e) => {
                                                     const val = Math.min(255, Math.max(0, parseInt(e.target.value) || 0));
                                                     const currentRGB = getCommandValue("Change Color") || { r: 255, g: 255, b: 255 };
-                                                    updateCommandValue("Change Color", { ...currentRGB, b: val });
+                                                    props.updateCommandValue("Change Color", { ...currentRGB, b: val });
                                                 }}
                                                 className="command-number-input rgb-input"
                                             />

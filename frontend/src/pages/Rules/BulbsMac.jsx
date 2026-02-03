@@ -2,20 +2,10 @@ import { useState } from "react";
 
 export default function BulbsMac(props) {
     const [bulbsMacsOpen, setBulbsMacsOpen] = useState(false);
-    const [selectedBulbsMacs, setSelectedBulbsMacs] = useState([]);
-
-    const toggleBulbsMac = (bulbsMac) => {
-        setSelectedBulbsMacs(prev =>
-            prev.includes(bulbsMac)
-                ? prev.filter(mac => mac !== bulbsMac)
-                : [...prev, bulbsMac]
-        );
-        props.addBulbsMac(bulbsMac)
-    };
 
     return (
         <div
-            className={props.isEmpty && selectedBulbsMacs.length === 0 ? "select-bulbsMacs-empty" : "select-bulbsMacs"}
+            className={props.isEmpty && props.selectedBulbsMacs.length === 0 ? "select-bulbsMacs-empty" : "select-bulbsMacs"}
             onBlur={(e) => {
                 if (!e.currentTarget.contains(e.relatedTarget)) {
                     setBulbsMacsOpen(false);
@@ -27,29 +17,37 @@ export default function BulbsMac(props) {
                 className="select-bulbsMacs-header"
                 onClick={() => setBulbsMacsOpen(prev => !prev)}
             >
-                {selectedBulbsMacs.length === 0 ? "Select Bulbs..." : `(${selectedBulbsMacs.length}) Bulbs${selectedBulbsMacs.length === 1 ? "" : "s"} Selected`} {bulbsMacsOpen ? '◀' : '▶'}
+                {props.selectedBulbsMacs.length === 0 ? "Select Bulbs..." : `(${props.selectedBulbsMacs.length}) Bulb${props.selectedBulbsMacs.length === 1 ? "" : "s"} Selected`} {bulbsMacsOpen ? '◀' : '▶'}
             </div>
             {bulbsMacsOpen && (
                 <div
                     className="select-bulbsMacs-list"
                 >
-                    {props.data ?
-                        props.data.map(bulbsMac => (
-                            <label key={bulbsMac.mac} className="select-bulbsMacs-item">
+                    {props.data && props.data.length > 0 ?
+                        <>
+                            <label className="select-bulbsMacs-item">
                                 <input
                                     type="checkbox"
-                                    checked={selectedBulbsMacs.includes(bulbsMac.mac)}
-                                    onChange={() => toggleBulbsMac(bulbsMac.mac)}
+                                    checked={props.selectedBulbsMacs.length === props.data.length}
+                                    onChange={() => props.addBulbsMac("toggleAll")}
                                 />
-                                {bulbsMac.name}
+                                Select All
                             </label>
-                        ))
+                            {props.data.map(bulbsMac => (
+                                <label key={bulbsMac.mac} className="select-bulbsMacs-item">
+                                    <input
+                                        type="checkbox"
+                                        checked={props.selectedBulbsMacs.includes(bulbsMac.mac)}
+                                        onChange={() => props.addBulbsMac(bulbsMac.mac)}
+                                    />
+                                    {bulbsMac.name}
+                                </label>
+                            ))}
+                        </>
                         : <section className="rules-empty-array">No Bulbs Found. Head to Bulbs tab.</section>
                     }
                 </div>
             )}
-
         </div>
-
     )
 }

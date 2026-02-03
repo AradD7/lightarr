@@ -15,7 +15,8 @@
     gap: 20px;
 }
 
-.add-rule-page>h1 {
+.add-rule-page>h1,
+.command-bulb-pair>h1 {
     color: var(--textInContainerColor);
     margin: 0;
 }
