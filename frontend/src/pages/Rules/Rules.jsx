@@ -163,7 +163,7 @@ export default function Rules() {
                             key={mac}
                             className="rule-bulbsMac-item"
                         >
-                            {allBulbs.find(bulb => bulb.mac === mac).name}{` (${mac})`}
+                            {allBulbs ? allBulbs.find(bulb => bulb.mac === mac).name : mac}
                         </h3>
                     ))}
                 </section>
