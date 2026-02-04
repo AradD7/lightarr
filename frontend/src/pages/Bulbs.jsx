@@ -222,13 +222,11 @@ export default function Bulbs() {
                                         ) : (
                                             <h2 className="bulb-name">
                                                 {bulb.name}
-                                                {bulb.isReachable &&
-                                                    <span
-                                                        className="bulb-name-edit-icon material-symbols-outlined"
-                                                        onClick={() => changeBulbName(bulb.mac, bulb.name)}
-                                                    > edit
-                                                    </span>
-                                                }
+                                                <span
+                                                    className="bulb-name-edit-icon material-symbols-outlined"
+                                                    onClick={() => changeBulbName(bulb.mac, bulb.name)}
+                                                > edit
+                                                </span>
                                             </h2>
                                         )}
                                         <h2 className="bulb-mac">

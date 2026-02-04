@@ -5,7 +5,7 @@ import Devices from "./Devices";
 import Events from "./Events";
 import Commands from "./Commands";
 import BulbsMac from "./BulbsMac";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const fetchAccounts = async () => {
@@ -85,6 +85,8 @@ const addRule = async ({ accounts, devices, events, commandBulbPairs }) => {
 
 export default function AddRule() {
     const navigate = useNavigate()
+    const bottomRef = useRef(null);
+
     const [selectedAccounts, setSelectedAccounts] = useState([]);
     const [selectedDevices, setSelectedDevices] = useState([]);
     const [selectedEvents, setSelectedEvents] = useState([]);
@@ -238,7 +240,6 @@ export default function AddRule() {
         }));
     };
 
-    // Get bulbs that are available for a specific pair (not used by other pairs)
     const getAvailableBulbsForPair = (pairId) => {
         if (!bulbs) return [];
 
@@ -255,6 +256,9 @@ export default function AddRule() {
             { id: nextPairId, commands: [], bulbsMacs: [] }
         ]);
         setNextPairId(prev => prev + 1);
+        setTimeout(() => {
+            bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
     };
 
     const handleRemoveCommandPair = (pairId) => {
@@ -288,8 +292,6 @@ export default function AddRule() {
         });
     }
 
-    console.log(commandBulbPairs);
-
     return (
         <>
             {isEmpty ? <h2>Cannot leave the following empty.</h2> : null}
@@ -318,6 +320,9 @@ export default function AddRule() {
                 <h1>Do</h1>
                 {commandBulbPairs.map((pair, index) => (
                     <div key={pair.id} className="command-bulb-pair">
+                        {index !== 0 && (
+                            <h1>And Do</h1>
+                        )}
                         <section onClick={() => setIsEmpty(false)}>
                             <Commands
                                 addCommand={(command) => toggleCommand(pair.id, command)}
@@ -337,25 +342,25 @@ export default function AddRule() {
                                 isEmpty={isEmpty}
                                 selectedBulbsMacs={pair.bulbsMacs}
                             />
-                            {commandBulbPairs.length > 1 && (
+                            {commandBulbPairs.length > 1 && index !== 0 && (
                                 <span
                                     className="material-symbols-outlined"
                                     onClick={() => handleRemoveCommandPair(pair.id)}
-                                    style={{ cursor: 'pointer', color: 'red' }}
                                 >
-                                    remove
+                                    delete
                                 </span>
                             )}
                         </section>
-                        {index === commandBulbPairs.length - 1 && (
-                            <span
-                                className="material-symbols-outlined"
-                                onClick={handleAddCommandPair}
-                                style={{ cursor: 'pointer' }}
-                            >
-                                add_2
-                            </span>
-                        )}
+                        {index === commandBulbPairs.length - 1
+                            && getAvailableBulbsForPair(nextPairId + 1).length !== 0
+                            && (
+                                <span
+                                    className="material-symbols-outlined"
+                                    onClick={handleAddCommandPair}
+                                >
+                                    add_2
+                                </span>
+                            )}
                     </div>
                 ))}
                 <button
@@ -364,6 +369,7 @@ export default function AddRule() {
                 >
                     Add Rule
                 </button>
+                <div ref={bottomRef} />
             </div>
         </>
     )

@@ -85,8 +85,6 @@ export default function Rules() {
         return paramsArr;
     }
 
-    console.log(rules);
-
     const rulesToDisplay = rules?.map(rule => (
         <div key={rule.ruleID} className="rule-item">
             <section className="rule-header">
@@ -145,28 +143,42 @@ export default function Rules() {
                         </h3>
                     ))}
                 </section>
-                <h2>Perform Command{paramsToArray(rule.action[0].command.params).length === 1 ? "" : "s"}:</h2>
-                <section className="rule-commands">
-                    {paramsToArray(rule.action[0].command.params).map((cmd, idx) => (
-                        <h3
-                            key={idx}
-                            className="rule-command-item"
-                        >
-                            {cmd}
-                        </h3>
-                    ))}
-                </section>
-                <h2>To Bulb{rule.action[0].bulbsMac.length === 1 ? "" : "s"}:</h2>
-                <section className="rule-bulbsMacs">
-                    {rule.action[0].bulbsMac.map(mac => (
-                        <h3
-                            key={mac}
-                            className="rule-bulbsMac-item"
-                        >
-                            {allBulbs ? allBulbs.find(bulb => bulb.mac === mac).name : mac}
-                        </h3>
-                    ))}
-                </section>
+
+                {rule.action.map((act, idx) => (
+                    <section
+                        key={idx}
+                        className="rule-actions"
+                    >
+                        <h2>{idx === 0 ? "Perform Command" : "and Command"}{paramsToArray(act.command.params).length === 1 ? "" : "s"}:</h2>
+
+                        <section className="rule-commands">
+                            {paramsToArray(act.command.params).map((cmd, idx) => (
+                                <h3
+                                    key={idx}
+                                    className="rule-command-item"
+                                >
+                                    {cmd}
+                                </h3>
+                            ))}
+                        </section>
+
+                        <h2>To Bulb{act.bulbsMac.length === 1 ? "" : "s"}:</h2>
+
+                        <section className="rule-bulbsMacs">
+                            {act.bulbsMac.map(mac => (
+                                <h3
+                                    key={mac}
+                                    className="rule-bulbsMac-item"
+                                >
+                                    {allBulbs ? allBulbs.find(bulb => bulb.mac === mac).name : mac}
+                                </h3>
+                            ))}
+                        </section>
+                    </section>
+                ))}
+
+
+
             </section>
         </div>
     ));
