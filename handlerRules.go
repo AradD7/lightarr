@@ -1,9 +1,12 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
+
+	"github.com/AradD7/lightarr/internal/database"
 )
 
 func (cfg *config) handlerPrintRule(w http.ResponseWriter, r *http.Request) {
@@ -68,4 +71,41 @@ func (cfg *config) handlerDeleteRule(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusOK, "Deleted!")
+}
+
+func (cfg *config) handlerUpdateRuleName(w http.ResponseWriter, r *http.Request) {
+	type parameters struct {
+		Id   string `json:"id"`
+		Name string `json:"name"`
+	}
+
+	var params parameters
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&params); err != nil {
+		respondWithError(w, http.StatusBadRequest, "failed to read json data", err)
+		return
+	}
+
+	err := cfg.db.UpdateRuleName(r.Context(), database.UpdateRuleNameParams{
+		ID: params.Id,
+		Name: sql.NullString{
+			Valid:  true,
+			String: params.Name,
+		},
+	})
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+
+	for idx, rule := range cfg.rules {
+		if rule.Id == params.Id {
+			cfg.rules[idx].Name = params.Name
+			respondWithJSON(w, http.StatusOK, "Updated!")
+			return
+		}
+	}
+
+	respondWithError(w, http.StatusInternalServerError, "Something went wrong with changing the rule name. Please restart the server", nil)
 }

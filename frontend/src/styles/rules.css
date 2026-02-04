@@ -182,15 +182,22 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 15px;
 }
 
 .rule-header>h1 {
     font-size: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 7px;
 }
 
 .rule-header>.rule-more:hover {
     cursor: pointer;
+}
+
+.rule-name-input:focus {
+    width: 180px;
 }
 
 .rule-header>.rule-delete {
@@ -198,10 +205,16 @@
     font-size: 1.5rem;
 }
 
-.rule-header>.rule-arrow {
+.rule-update-name {
+    font-size: 1.5rem;
+    color: var(--textInContainerColor);
+    margin-left: 10px;
+}
+
+.rule-arrow {
     color: var(--plexYellow);
     font-size: 2.5rem;
-    margin-right: -24px;
+    margin-right: -10px;
 }
 
 .rule-description-hide {

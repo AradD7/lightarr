@@ -16,3 +16,9 @@ WHERE id = ?;
 -- name: GetAllRules :many
 SELECT * FROM rules;
 --
+
+-- name: UpdateRuleName :exec
+UPDATE rules
+SET name = ?
+WHERE id = ?;
+--

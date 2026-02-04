@@ -101,6 +101,7 @@ func main() {
 	mux.HandleFunc("POST /api/rules", config.handlerAddRule)
 	mux.HandleFunc("POST /api/rules/test", config.handlerPrintRule)
 	mux.HandleFunc("DELETE /api/rules/{ruleId}", config.handlerDeleteRule)
+	mux.HandleFunc("POST /api/rules/name", config.handlerUpdateRuleName)
 
 	mux.HandleFunc("POST /plexhook", config.handlerPlexWebhook)
 

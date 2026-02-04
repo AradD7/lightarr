@@ -217,7 +217,7 @@ export default function Bulbs() {
                                                 }}
                                                 onBlur={() => setChangingBulbName(null)}
                                                 autoFocus
-                                                className="bulb-name-input"
+                                                className="name-input bulb-name-input"
                                             />
                                         ) : (
                                             <h2 className="bulb-name">

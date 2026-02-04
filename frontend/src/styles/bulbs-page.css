@@ -102,3 +102,7 @@ div.bulbs-page {
     opacity: 1;
     border: 2px solid blue;
 }
+
+.bulb-name-input:focus {
+    width: 145px;
+}

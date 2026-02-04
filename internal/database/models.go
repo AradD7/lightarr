@@ -35,4 +35,5 @@ type Rule struct {
 	ID        string
 	Condition string
 	Action    string
+	Name      sql.NullString
 }

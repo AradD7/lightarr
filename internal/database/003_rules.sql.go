@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"database/sql"
 )
 
 const addRule = `-- name: AddRule :one
@@ -16,7 +17,7 @@ VALUES (
     ?,
     ?
 )
-RETURNING id, condition, "action"
+RETURNING id, condition, "action", name
 `
 
 type AddRuleParams struct {
@@ -28,7 +29,12 @@ type AddRuleParams struct {
 func (q *Queries) AddRule(ctx context.Context, arg AddRuleParams) (Rule, error) {
 	row := q.db.QueryRowContext(ctx, addRule, arg.ID, arg.Condition, arg.Action)
 	var i Rule
-	err := row.Scan(&i.ID, &i.Condition, &i.Action)
+	err := row.Scan(
+		&i.ID,
+		&i.Condition,
+		&i.Action,
+		&i.Name,
+	)
 	return i, err
 }
 
@@ -45,7 +51,7 @@ func (q *Queries) DeleteRule(ctx context.Context, id string) error {
 
 const getAllRules = `-- name: GetAllRules :many
 
-SELECT id, condition, "action" FROM rules
+SELECT id, condition, "action", name FROM rules
 `
 
 func (q *Queries) GetAllRules(ctx context.Context) ([]Rule, error) {
@@ -57,7 +63,12 @@ func (q *Queries) GetAllRules(ctx context.Context) ([]Rule, error) {
 	var items []Rule
 	for rows.Next() {
 		var i Rule
-		if err := rows.Scan(&i.ID, &i.Condition, &i.Action); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Condition,
+			&i.Action,
+			&i.Name,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -69,4 +80,21 @@ func (q *Queries) GetAllRules(ctx context.Context) ([]Rule, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateRuleName = `-- name: UpdateRuleName :exec
+
+UPDATE rules
+SET name = ?
+WHERE id = ?
+`
+
+type UpdateRuleNameParams struct {
+	Name sql.NullString
+	ID   string
+}
+
+func (q *Queries) UpdateRuleName(ctx context.Context, arg UpdateRuleNameParams) error {
+	_, err := q.db.ExecContext(ctx, updateRuleName, arg.Name, arg.ID)
+	return err
 }

@@ -95,3 +95,13 @@ div.nav-links>a.active {
     background-color: var(--plexYellow);
     cursor: default;
 }
+
+.name-input:focus {
+    font-size: 1.2rem;
+    background-color: var(--containerColor);
+    border: 2px solid var(--plexYellow);
+    border-radius: 10px;
+    outline: none;
+    color: var(--textInContainerColor);
+    padding-left: 7px;
+}

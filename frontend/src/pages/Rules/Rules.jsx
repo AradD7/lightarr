@@ -16,6 +16,15 @@ const deleteRule = async (id) => {
     return response.json();
 };
 
+const updateRuleName = async ({ id, name }) => {
+    const response = await fetch("http://localhost:10100/api/rules/name", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, name }),
+    });
+    if (!response.ok) throw new Error('Failed to update rule name');
+};
+
 const fetchAllBulbs = async () => {
     const response = await fetch("http://localhost:10100/api/bulbs");
     if (!response.ok) throw new Error('Network response was not ok');
@@ -24,6 +33,8 @@ const fetchAllBulbs = async () => {
 
 export default function Rules() {
     const [rulesToShow, setRulesToShow] = useState([]);
+    const [changingRuleId, setChangingRuleId] = useState([]);
+    const [newName, setNewName] = useState("");
 
     const navigate = useNavigate();
     const queryClient = useQueryClient();
@@ -45,6 +56,16 @@ export default function Rules() {
         }
     });
 
+    const updateNameMutation = useMutation({
+        mutationFn: updateRuleName,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['rules'] })
+        },
+        onError: (error) => {
+            console.log(error)
+        },
+    });
+
     const handleRuleDelete = (id) => {
         deleteRuleMutation.mutate(id);
     };
@@ -56,6 +77,20 @@ export default function Rules() {
         }
         setRulesToShow(prev => [...prev, id]);
         return;
+    };
+
+    const handleUpdateRuleName = (ruleId, currentName) => {
+        setChangingRuleId(ruleId);
+        setNewName(currentName);
+    };
+
+    const handleNameSubmit = (id) => {
+        if (newName.trim()) {
+            setChangingRuleId(null);
+            updateNameMutation.mutate({ id, name: newName.trim() });
+        } else {
+            setChangingRuleId(null);
+        }
     };
 
     const paramsToArray = (params) => {
@@ -98,8 +133,27 @@ export default function Rules() {
                     className="rule-more"
                     onClick={() => handleRuleMore(rule.ruleID)}
                 >
-                    Rule {rule.ruleID.split("-")[1]}
+                    Rule {changingRuleId === rule.ruleID ? (
+                        <input
+                            type="text"
+                            value={newName}
+                            onChange={(e) => setNewName(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleNameSubmit(rule.ruleID);
+                                if (e.key === 'Escape') setChangingRuleId(null);
+                            }}
+                            onBlur={() => setChangingRuleId(null)}
+                            autoFocus
+                            className="name-input rule-name-input"
+                        />
+                    ) : rule.name ? rule.name : rule.ruleID.split("-")[1]}
                 </h1>
+                <span
+                    className="material-symbols-outlined rule-update-name"
+                    onClick={() => handleUpdateRuleName(rule.ruleID, rule.name)}
+                >
+                    edit
+                </span>
                 <span
                     className="material-symbols-outlined rule-delete"
                     onClick={() => handleRuleDelete(rule.ruleID)}

@@ -44,6 +44,7 @@ type RuleCondition struct {
 }
 
 type Rule struct {
+	Name      string        `json:"name"`
 	Id        string        `json:"ruleID"`
 	Condition RuleCondition `json:"condition"`
 	Action    []WizAction   `json:"action"`
