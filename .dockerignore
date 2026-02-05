@@ -1,0 +1,18 @@
+# Git
+.git
+.gitignore
+
+# Environment and data
+.env
+data/
+
+# Documentation
+*.md
+README.md
+
+# Frontend build artifacts
+frontend/dist/
+frontend/node_modules/
+
+# GitHub Actions
+.github

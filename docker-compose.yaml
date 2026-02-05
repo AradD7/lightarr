@@ -1,0 +1,14 @@
+services:
+  lightarr:
+    build: .
+    container_name: lightarr
+    environment:
+      - PORT=8080
+      - X_PLEX_TOKEN=${X_PLEX_TOKEN}
+      - X_PLEX_CLIENT_IDENTIFIER=lightarr-app
+      - DB_PATH=/data/lightarr.db
+    volumes:
+      - ./data:/data
+    ports:
+      - "${PORT:-10100}:8080"
+    restart: unless-stopped

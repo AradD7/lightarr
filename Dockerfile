@@ -1,5 +1,9 @@
 FROM golang:1.23-alpine AS builder
+WORKDIR /app
+COPY . .
+RUN go build -o lightarr ./cmd/lightarr
 
-COPY lightarr /bin/lightarr
-
-RUN /bin/lightarr
+FROM alpine:3.19
+RUN apk add --no-cache ca-certificates
+COPY --from=builder /app/lightarr /bin/lightarr
+CMD ["/bin/lightarr"]
