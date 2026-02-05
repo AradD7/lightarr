@@ -1,5 +1,6 @@
 *.test
 
+*.db
 go.work
 go.work.sum
 
