@@ -6,7 +6,7 @@ on:
     tags: [ 'v*' ]
     paths-ignore:
       - '**.md'
-      - 'docker-compose*.yml'
+      - 'docker-compose*.yaml'
       - '.gitignore'
       - '.env.example'
       - 'docs/**'
