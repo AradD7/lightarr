@@ -9,3 +9,5 @@ go.work.sum
 structs.json
 
 data/
+
+docker-compose-dev.yaml

@@ -1,7 +1,6 @@
 services:
   lightarr:
     image: aradd7/lightarr:latest
-    build: .
     container_name: lightarr
     environment:
       - PORT=${PORT:-10100}
