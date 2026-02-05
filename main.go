@@ -34,10 +34,23 @@ var embedStatics embed.FS
 
 func main() {
 	godotenv.Load()
+
 	port := os.Getenv("PORT")
+	if port == "" {
+		port = "10100"
+	}
+
 	dbPath := os.Getenv("DB_PATH")
-	xPlexToken := os.Getenv("X_PLEX_TOKEN")
+	if dbPath == "" {
+		dbPath = "./lightarr.db"
+	}
+
 	xClientId := os.Getenv("X_PLEX_CLIENT_IDENTIFIER")
+	if xClientId == "" {
+		xClientId = "lightarr-app"
+	}
+
+	xPlexToken := os.Getenv("X_PLEX_TOKEN")
 
 	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
