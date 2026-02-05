@@ -9,19 +9,19 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const fetchAccounts = async () => {
-    const response = await fetch("http://localhost:10100/api/accounts");
+    const response = await fetch("/api/accounts");
     if (!response.ok) throw new Error('Network response was not ok');
     return response.json();
 };
 
 const fetchDevices = async () => {
-    const response = await fetch("http://localhost:10100/api/devices");
+    const response = await fetch("/api/devices");
     if (!response.ok) throw new Error('Network response was not ok');
     return response.json();
 };
 
 const fetchAllBulbs = async () => {
-    const response = await fetch("http://localhost:10100/api/bulbs");
+    const response = await fetch("/api/bulbs");
     if (!response.ok) throw new Error('Network response was not ok');
     return response.json();
 }
@@ -72,7 +72,7 @@ const addRule = async ({ accounts, devices, events, commandBulbPairs }) => {
         })
     };
 
-    const response = await fetch("http://localhost:10100/api/rules", {
+    const response = await fetch("/api/rules", {
         method: "POST",
         headers: {
             'Content-Type': 'application/json',

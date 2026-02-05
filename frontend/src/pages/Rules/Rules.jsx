@@ -3,13 +3,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const fetchRules = async () => {
-    const response = await fetch("http://localhost:10100/api/rules");
+    const response = await fetch("/api/rules");
     if (!response.ok) throw new Error('Network response was not ok');
     return response.json();
 };
 
 const deleteRule = async (id) => {
-    const response = await fetch(`http://localhost:10100/api/rules/${id}`, {
+    const response = await fetch(`/api/rules/${id}`, {
         method: 'DELETE',
     });
     if (!response.ok) throw new Error('Failed to delete device');
@@ -17,7 +17,7 @@ const deleteRule = async (id) => {
 };
 
 const updateRuleName = async ({ id, name }) => {
-    const response = await fetch("http://localhost:10100/api/rules/name", {
+    const response = await fetch("/api/rules/name", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, name }),
@@ -26,7 +26,7 @@ const updateRuleName = async ({ id, name }) => {
 };
 
 const fetchAllBulbs = async () => {
-    const response = await fetch("http://localhost:10100/api/bulbs");
+    const response = await fetch("/api/bulbs");
     if (!response.ok) throw new Error('Network response was not ok');
     return response.json();
 }

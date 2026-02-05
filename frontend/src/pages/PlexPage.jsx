@@ -7,31 +7,31 @@ import appleLogo from "/assets/icons/apple.png";
 import defaultLogo from "/assets/icons/Plex.png";
 
 const fetchAccounts = async () => {
-    const response = await fetch("http://localhost:10100/api/accounts");
+    const response = await fetch("/api/accounts");
     if (!response.ok) throw new Error('Network response was not ok');
     return response.json();
 };
 
 const fetchAllAccounts = async () => {
-    const response = await fetch("http://localhost:10100/api/plex/accounts");
+    const response = await fetch("/api/plex/accounts");
     if (!response.ok) throw new Error('Network response was not ok');
     return response.json();
 };
 
 const fetchDevices = async () => {
-    const response = await fetch("http://localhost:10100/api/devices");
+    const response = await fetch("/api/devices");
     if (!response.ok) throw new Error('Network response was not ok');
     return response.json();
 };
 
 const fetchAllDevices = async () => {
-    const response = await fetch("http://localhost:10100/api/plex/devices");
+    const response = await fetch("/api/plex/devices");
     if (!response.ok) throw new Error('Network response was not ok');
     return response.json();
 };
 
 const deleteAccount = async (id) => {
-    const response = await fetch(`http://localhost:10100/api/accounts/${id}`, {
+    const response = await fetch(`/api/accounts/${id}`, {
         method: 'DELETE',
     });
     if (!response.ok) throw new Error('Failed to delete account');
@@ -39,7 +39,7 @@ const deleteAccount = async (id) => {
 };
 
 const addAccount = async (account) => {
-    const response = await fetch("http://localhost:10100/api/accounts", {
+    const response = await fetch("/api/accounts", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ const addAccount = async (account) => {
 };
 
 const deleteDevice = async (id) => {
-    const response = await fetch(`http://localhost:10100/api/devices/${id}`, {
+    const response = await fetch(`/api/devices/${id}`, {
         method: 'DELETE',
     });
     if (!response.ok) throw new Error('Failed to delete device');
@@ -59,7 +59,7 @@ const deleteDevice = async (id) => {
 };
 
 const addDevice = async (device) => {
-    const response = await fetch("http://localhost:10100/api/devices", {
+    const response = await fetch("/api/devices", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

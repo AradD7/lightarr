@@ -7,19 +7,19 @@ import gu10Bulb from "/assets/bulbs/gu10Bulb.png"
 import { useState } from "react";
 
 const fetchAllBulbs = async () => {
-    const response = await fetch("http://localhost:10100/api/bulbs");
+    const response = await fetch("/api/bulbs");
     if (!response.ok) throw new Error('Network response was not ok');
     return response.json();
 }
 
 const fetchNewBulbs = async () => {
-    const response = await fetch("http://localhost:10100/api/bulbs/refresh");
+    const response = await fetch("/api/bulbs/refresh");
     if (!response.ok) throw new Error('Refresh bulbs response was not ok');
     return response.json();
 }
 
 const flashBulbRequest = async (mac) => {
-    const response = await fetch("http://localhost:10100/api/bulbs/flash", {
+    const response = await fetch("/api/bulbs/flash", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -30,7 +30,7 @@ const flashBulbRequest = async (mac) => {
 };
 
 const updateBulbName = async ({ mac, name }) => {
-    const response = await fetch("http://localhost:10100/api/bulbs/name", {
+    const response = await fetch("/api/bulbs/name", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mac, name }),
@@ -39,7 +39,7 @@ const updateBulbName = async ({ mac, name }) => {
 };
 
 const updateBulbType = async ({ mac, type }) => {
-    const response = await fetch("http://localhost:10100/api/bulbs/type", {
+    const response = await fetch("/api/bulbs/type", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mac, type }),
