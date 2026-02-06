@@ -42,7 +42,7 @@ func main() {
 
 	dbPath := os.Getenv("DB_PATH")
 	if dbPath == "" {
-		dbPath = "./lightarr.db"
+		dbPath = "./data/lightarr.db"
 	}
 
 	xClientId := os.Getenv("X_PLEX_CLIENT_IDENTIFIER")
