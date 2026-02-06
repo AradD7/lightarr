@@ -69,6 +69,7 @@ func (cfg *config) loadRules() error {
 			continue
 		}
 		cfg.rules = append(cfg.rules, Rule{
+			Name:      rule.Name.String,
 			Id:        rule.ID,
 			Condition: tempCondition,
 			Action:    tempWizAction,
