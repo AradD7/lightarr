@@ -188,7 +188,7 @@ export default function Rules() {
                 </section>
                 <h2>On Device{!rule.condition.device || rule.condition.device.length <= 1 ? "" : "s"}:</h2>
                 <section className="rule-devices">
-                    {!rule.condition.account ? <h3>Any</h3> : rule.condition.device.map(dev => (
+                    {!rule.condition.device ? <h3>Any</h3> : rule.condition.device.map(dev => (
                         <h3
                             key={dev.id}
                             className="rule-device-item"
