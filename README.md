@@ -1,6 +1,7 @@
 # Lightarr
 Lightarr is a home automation tool that connects your Plex server to your Wiz light bulbs. Add this 
 lightweight and simple to use app to your *arr collection and enjoy!
+If you are interested in installing Lightarr on Unraid or want to see a demo of it, check out [my video](https://www.youtube.com/watch?v=4YhPkRt-W6o)!
 
 # Motivation
 One of the most annoying parts of a movie night is deciding who has to get up and turn all 
@@ -61,6 +62,7 @@ WIZ_SUBNET=192.168.1.0/24
 Access the interface at `http://<lightarr-ip>:10100` (replace with your server's IP and port)
 
 ### Initial Setup
+If you prefer to see a video explanation, check out my [video on youtube](https://youtu.be/4YhPkRt-W6o?t=247).
 
 1. **Head to Plex tab**
     - Click "Plex Accounts" to fetch and save users from your Plex server
@@ -131,7 +133,7 @@ When you press play on the Living Room TV:
 
 ```bash
 # Clone repo
-git clone https://github.com/yourusername/lightarr.git
+git clone https://github.com/aradd7/lightarr.git
 cd lightarr
 
 # Set up environment
@@ -163,3 +165,6 @@ go run .
 - Port 10100/TCP for webhooks and web UI
 - UDP communication to Wiz bulbs (port 38899)
 - Subnet scanning discovers bulbs without broadcast
+
+# Disclaimer
+Lightarr is not vibe coded and most of the code was written by hand. AI was used only to ensure code quality, debugging and some JavaScript (cause it's JavaScript).
