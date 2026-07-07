@@ -19,12 +19,12 @@ type GetPilotParams struct {
 	} `json:"result"`
 }
 
-func (cfg *config) LoadBulbs(conn *net.UDPConn) {
+func (cfg *config.Config) LoadBulbs(conn *net.UDPConn) {
 	bulbsMap := make(map[string]*wiz.Bulb)
 
 	data, err := cfg.db.GetAllBulbs(context.Background())
 	if err != nil {
-		fmt.Printf("Could not read bulbs from db: %s\n", err.Error())
+		cfg.logger.Error(fmt.Sprintf("Could not read bulbs from db: %s", err.Error()))
 		return
 	}
 
@@ -47,11 +47,11 @@ func (cfg *config) LoadBulbs(conn *net.UDPConn) {
 	cfg.UpdateBulbs(conn, bulbsMap)
 }
 
-func (cfg *config) UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*wiz.Bulb) int {
+func (cfg *config.Config) UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*wiz.Bulb) int {
 	if bulbsMap != nil {
-		fmt.Println("Updating current bulbs and checking for additional light bulbs on the network...")
+		cfg.logger.Info("Updating current bulbs and checking for additional light bulbs on the network...")
 	} else {
-		fmt.Println("No cache file found. Discovering light bulbs on the network...")
+		cfg.logger.Info("No cache file found. Discovering light bulbs on the network...")
 	}
 
 	subnet := os.Getenv("WIZ_SUBNET")
@@ -76,7 +76,7 @@ func (cfg *config) UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*wiz.Bulb)
 					UpdatedAt: time.Now(),
 				})
 				if err != nil {
-					fmt.Printf("Failed to update DB: %v\n", err.Error())
+					cfg.logger.Error(fmt.Sprintf("Failed to update DB: %v", err.Error()))
 				}
 				updatedBulbs += 1
 			}
@@ -91,7 +91,7 @@ func (cfg *config) UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*wiz.Bulb)
 				IsReachable: true,
 			})
 			if err != nil {
-				fmt.Printf("Failed to add bulb to DB: %v\n", err.Error())
+				cfg.logger.Error(fmt.Sprintf("Failed to add bulb to DB: %v", err.Error()))
 			}
 			bulbId += 1
 		}
@@ -101,36 +101,36 @@ func (cfg *config) UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*wiz.Bulb)
 	case 0:
 		break
 	case 1:
-		fmt.Printf("Updated %d bulb\n", updatedBulbs)
+		cfg.logger.Info(fmt.Sprintf("Updated %d bulb", updatedBulbs))
 	default:
-		fmt.Printf("Updated %d bulbs\n", updatedBulbs)
+		cfg.logger.Info(fmt.Sprintf("Updated %d bulbs", updatedBulbs))
 	}
 
 	switch bulbId {
 	case 0:
-		fmt.Println("Found no new bulbs.")
+		cfg.logger.Info("Found no new bulbs.")
 	case 1:
-		fmt.Printf("Found %d new bulb\n", bulbId)
+		cfg.logger.Info(fmt.Sprintf("Found %d new bulb", bulbId))
 	default:
-		fmt.Printf("Found %d new bulbs\n", bulbId)
+		cfg.logger.Info(fmt.Sprintf("Found %d new bulbs", bulbId))
 	}
 
 	cfg.bulbsMap = bulbsMap
 	return bulbId
 }
 
-func (cfg *config) scanSubnetForBulbs(conn *net.UDPConn, subnet string) map[string]*wiz.Bulb {
+func (cfg *config.Config) scanSubnetForBulbs(conn *net.UDPConn, subnet string) map[string]*wiz.Bulb {
 	bulbs := make(map[string]*wiz.Bulb)
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 
 	ip, ipNet, err := net.ParseCIDR(subnet)
 	if err != nil {
-		fmt.Printf("Invalid subnet %s: %v\n", subnet, err)
+		cfg.logger.Error(fmt.Sprintf("Invalid subnet %s: %v", subnet, err))
 		return bulbs
 	}
 
-	fmt.Printf("Scanning subnet %s for Wiz bulbs...\n", subnet)
+	cfg.logger.Info(fmt.Sprintf("Scanning subnet %s for Wiz bulbs...", subnet))
 
 	semaphore := make(chan struct{}, 50)
 
@@ -156,11 +156,11 @@ func (cfg *config) scanSubnetForBulbs(conn *net.UDPConn, subnet string) map[stri
 	}
 
 	wg.Wait()
-	fmt.Printf("Scan complete. Found %d bulbs.\n", len(bulbs))
+	cfg.logger.Info(fmt.Sprintf("Scan complete. Found %d bulbs", len(bulbs)))
 	return bulbs
 }
 
-func (cfg *config) probeBulb(conn *net.UDPConn, ip string) *wiz.Bulb {
+func (cfg *config.Config) probeBulb(conn *net.UDPConn, ip string) *wiz.Bulb {
 	targetAddr := &net.UDPAddr{
 		IP:   net.ParseIP(ip),
 		Port: 38899,

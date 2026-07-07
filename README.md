@@ -6,7 +6,7 @@ If you are interested in installing Lightarr on Unraid or want to see a demo of 
 # Motivation
 One of the most annoying parts of a movie night is deciding who has to get up and turn all 
 the lights off. But now, whether it's with your family, significant other, friends or even a solo 
-movie night, you can leave it to Lightarr! Simply install it on your home server or PC and configure 
+movie night, you can leave it to Lightarr! Simply install it on your home server or PC and config.Configure 
 it to your liking and never worry about getting up right before you start the movie.
 
 ## Quick Start

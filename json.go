@@ -2,33 +2,33 @@ package main
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
 )
 
-func respondWithError(w http.ResponseWriter, code int, msg string, err error) {
+func (cfg *config.Config) respondWithError(w http.ResponseWriter, code int, msg string, err error) {
 	if err != nil {
-		log.Println(err)
+		cfg.logger.Error(fmt.Sprintf("%s %s", msg, err.Error()))
 	}
 
 	if code > 499 {
-		log.Printf("Responding with 5XX error: %s", msg)
+		cfg.logger.Warn("Responding with 5XX error")
 	}
 
 	type errorResponse struct {
 		Error string `json:"error"`
 	}
-	respondWithJSON(w, code, errorResponse{
+	cfg.respondWithJSON(w, code, errorResponse{
 		Error: msg,
 	})
 }
 
-func respondWithJSON(w http.ResponseWriter, code int, payload any) {
+func (cfg *config.Config) respondWithJSON(w http.ResponseWriter, code int, payload any) {
 	w.Header().Add("Content-Type", "application/json")
 
 	data, err := json.Marshal(payload)
 	if err != nil {
-		log.Printf("Could not marshal the response: %v", err)
+		cfg.logger.Error(fmt.Sprintf("Could not marshal the response: %v", err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

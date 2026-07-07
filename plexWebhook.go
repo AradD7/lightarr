@@ -7,21 +7,22 @@ import (
 )
 
 func (cfg *config) handlerPlexWebhook(w http.ResponseWriter, r *http.Request) {
+	cfg.logger.Debug("Recieved Plex Payload")
 	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Failed to parse form", err)
+		cfg.respondWithError(w, http.StatusBadRequest, "Failed to parse form", err)
 		return
 	}
 
 	payload := r.FormValue("payload")
 	if payload == "" {
-		respondWithError(w, http.StatusBadRequest, "No payload found", nil)
+		cfg.respondWithError(w, http.StatusBadRequest, "No payload found", nil)
 		return
 	}
 
 	var params PlexPayload
 	if err := json.Unmarshal([]byte(payload), &params); err != nil {
-		respondWithError(w, http.StatusBadRequest, "Failed to decode JSON", err)
+		cfg.respondWithError(w, http.StatusBadRequest, "Failed to decode JSON", err)
 		return
 	}
 
@@ -30,5 +31,5 @@ func (cfg *config) handlerPlexWebhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	cfg.executeActions(action)
-	fmt.Printf("Rule %s was triggered\n", ruleId)
+	cfg.logger.Info(fmt.Sprintf("Rule %s was triggered", ruleId))
 }
