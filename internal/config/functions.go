@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (cfg *Config) loadRules() error {
+func (cfg *Config) LoadRules() error {
 	cfg.Logger.Info("Loading rules...")
 	rulesInDb, err := cfg.Db.GetAllRules(context.Background())
 	if err != nil {
@@ -46,7 +46,7 @@ func (cfg *Config) loadRules() error {
 	return nil
 }
 
-func (cfg *Config) addRule(event []string, account []plex.PlexAccount, player []plex.PlexDevice, actions []wiz.WizAction) error {
+func (cfg *Config) AddRule(event []string, account []plex.PlexAccount, player []plex.PlexDevice, actions []wiz.WizAction) error {
 	newRule := rules.Rule{}
 	newRule.Id = uuid.New().String()
 	newRule.Condition.Account = append(newRule.Condition.Account, account...)
@@ -75,7 +75,7 @@ func (cfg *Config) addRule(event []string, account []plex.PlexAccount, player []
 	return nil
 }
 
-func (cfg *Config) deleteRule(id string) error {
+func (cfg *Config) DeleteRule(id string) error {
 	for idx, rule := range cfg.Rules {
 		if rule.Id == id {
 			cfg.Rules = slices.Delete(cfg.Rules, idx, idx+1)
@@ -85,7 +85,7 @@ func (cfg *Config) deleteRule(id string) error {
 	return fmt.Errorf("Failed to fund rule with id %s", id)
 }
 
-func (cfg *Config) triggersRule(payload plex.PlexPayload) ([]wiz.WizAction, string) {
+func (cfg *Config) TriggersRule(payload plex.PlexPayload) ([]wiz.WizAction, string) {
 	for _, rule := range cfg.Rules {
 		if slices.Contains(rule.Condition.Event, payload.Event) && isPayloadAccountInRule(rule, payload) && isPayloadDeviceInRule(rule, payload) {
 			return rule.Action, rule.Id
@@ -127,7 +127,7 @@ func (cfg *Config) getBulbByBulbMac(bulbMac string) *wiz.Bulb {
 	return nil
 }
 
-func (cfg *Config) executeActions(actions []wiz.WizAction) {
+func (cfg *Config) ExecuteActions(actions []wiz.WizAction) {
 	for _, action := range actions {
 		for _, mac := range action.BulbsMac {
 			bulb := cfg.getBulbByBulbMac(mac)

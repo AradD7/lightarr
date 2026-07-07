@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/AradD7/lightarr/internal/config"
 	"github.com/AradD7/lightarr/internal/database"
 	"github.com/AradD7/lightarr/internal/wiz"
 )
 
-func (cfg *config) handlerGetBulbs(w http.ResponseWriter, r *http.Request) {
+func (cfg *Config) handlerGetBulbs(w http.ResponseWriter, r *http.Request) {
 	var bulbs []*wiz.Bulb
 	for _, bulb := range cfg.bulbsMap {
 		bulbs = append(bulbs, bulb)
