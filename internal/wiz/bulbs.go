@@ -1,16 +1,16 @@
-package main
+package wiz
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net"
 	"os"
 	"sync"
 	"time"
 
 	"github.com/AradD7/lightarr/internal/database"
-	"github.com/AradD7/lightarr/internal/wiz"
 )
 
 type GetPilotParams struct {
@@ -19,17 +19,17 @@ type GetPilotParams struct {
 	} `json:"result"`
 }
 
-func (cfg *config.Config) LoadBulbs(conn *net.UDPConn) {
-	bulbsMap := make(map[string]*wiz.Bulb)
+func LoadBulbs(conn *net.UDPConn, db *database.Queries, logger *slog.Logger) {
+	bulbsMap := make(map[string]*Bulb)
 
-	data, err := cfg.db.GetAllBulbs(context.Background())
+	data, err := db.GetAllBulbs(context.Background())
 	if err != nil {
-		cfg.logger.Error(fmt.Sprintf("Could not read bulbs from db: %s", err.Error()))
+		logger.Error(fmt.Sprintf("Could not read bulbs from db: %s", err.Error()))
 		return
 	}
 
 	for _, bulb := range data {
-		currentBulb := wiz.Bulb{
+		currentBulb := Bulb{
 			Mac:  bulb.Mac,
 			Ip:   net.ParseIP(bulb.Ip),
 			Name: bulb.Name,
@@ -44,14 +44,14 @@ func (cfg *config.Config) LoadBulbs(conn *net.UDPConn) {
 		bulbsMap[bulb.Mac] = &currentBulb
 	}
 
-	cfg.UpdateBulbs(conn, bulbsMap)
+	UpdateBulbs(conn, bulbsMap, db, logger)
 }
 
-func (cfg *config.Config) UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*wiz.Bulb) int {
+func UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*Bulb, db *database.Queries, logger *slog.Logger) (map[string]*Bulb, int) {
 	if bulbsMap != nil {
-		cfg.logger.Info("Updating current bulbs and checking for additional light bulbs on the network...")
+		logger.Info("Updating current bulbs and checking for additional light bulbs on the network...")
 	} else {
-		cfg.logger.Info("No cache file found. Discovering light bulbs on the network...")
+		logger.Info("No cache file found. Discovering light bulbs on the network...")
 	}
 
 	subnet := os.Getenv("WIZ_SUBNET")
@@ -59,7 +59,7 @@ func (cfg *config.Config) UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*wi
 		subnet = "192.168.1.0/24"
 	}
 
-	discoveredBulbs := cfg.scanSubnetForBulbs(conn, subnet)
+	discoveredBulbs := scanSubnetForBulbs(conn, subnet, logger)
 
 	bulbId := 0
 	updatedBulbs := 0
@@ -70,19 +70,19 @@ func (cfg *config.Config) UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*wi
 			if !cachedBulb.Ip.Equal(discoveredBulb.Ip) {
 				bulbsMap[mac].Addr.IP = discoveredBulb.Ip
 				bulbsMap[mac].Ip = discoveredBulb.Ip
-				err := cfg.db.UpdateBulbIp(context.Background(), database.UpdateBulbIpParams{
+				err := db.UpdateBulbIp(context.Background(), database.UpdateBulbIpParams{
 					Mac:       mac,
 					Ip:        discoveredBulb.Ip.String(),
 					UpdatedAt: time.Now(),
 				})
 				if err != nil {
-					cfg.logger.Error(fmt.Sprintf("Failed to update DB: %v", err.Error()))
+					logger.Error(fmt.Sprintf("Failed to update DB: %v", err.Error()))
 				}
 				updatedBulbs += 1
 			}
 		} else {
 			bulbsMap[mac] = discoveredBulb
-			_, err := cfg.db.AddBulb(context.Background(), database.AddBulbParams{
+			_, err := db.AddBulb(context.Background(), database.AddBulbParams{
 				Mac:         mac,
 				Ip:          discoveredBulb.Ip.String(),
 				Name:        "WizBulb",
@@ -91,7 +91,7 @@ func (cfg *config.Config) UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*wi
 				IsReachable: true,
 			})
 			if err != nil {
-				cfg.logger.Error(fmt.Sprintf("Failed to add bulb to DB: %v", err.Error()))
+				logger.Error(fmt.Sprintf("Failed to add bulb to DB: %v", err.Error()))
 			}
 			bulbId += 1
 		}
@@ -101,36 +101,35 @@ func (cfg *config.Config) UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*wi
 	case 0:
 		break
 	case 1:
-		cfg.logger.Info(fmt.Sprintf("Updated %d bulb", updatedBulbs))
+		logger.Info(fmt.Sprintf("Updated %d bulb", updatedBulbs))
 	default:
-		cfg.logger.Info(fmt.Sprintf("Updated %d bulbs", updatedBulbs))
+		logger.Info(fmt.Sprintf("Updated %d bulbs", updatedBulbs))
 	}
 
 	switch bulbId {
 	case 0:
-		cfg.logger.Info("Found no new bulbs.")
+		logger.Info("Found no new bulbs.")
 	case 1:
-		cfg.logger.Info(fmt.Sprintf("Found %d new bulb", bulbId))
+		logger.Info(fmt.Sprintf("Found %d new bulb", bulbId))
 	default:
-		cfg.logger.Info(fmt.Sprintf("Found %d new bulbs", bulbId))
+		logger.Info(fmt.Sprintf("Found %d new bulbs", bulbId))
 	}
 
-	cfg.bulbsMap = bulbsMap
-	return bulbId
+	return bulbsMap, bulbId
 }
 
-func (cfg *config.Config) scanSubnetForBulbs(conn *net.UDPConn, subnet string) map[string]*wiz.Bulb {
-	bulbs := make(map[string]*wiz.Bulb)
+func scanSubnetForBulbs(conn *net.UDPConn, subnet string, logger *slog.Logger) map[string]*Bulb {
+	bulbs := make(map[string]*Bulb)
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 
 	ip, ipNet, err := net.ParseCIDR(subnet)
 	if err != nil {
-		cfg.logger.Error(fmt.Sprintf("Invalid subnet %s: %v", subnet, err))
+		logger.Error(fmt.Sprintf("Invalid subnet %s: %v", subnet, err))
 		return bulbs
 	}
 
-	cfg.logger.Info(fmt.Sprintf("Scanning subnet %s for Wiz bulbs...", subnet))
+	logger.Info(fmt.Sprintf("Scanning subnet %s for Wiz bulbs...", subnet))
 
 	semaphore := make(chan struct{}, 50)
 
@@ -147,7 +146,7 @@ func (cfg *config.Config) scanSubnetForBulbs(conn *net.UDPConn, subnet string) m
 			defer wg.Done()
 			defer func() { <-semaphore }()
 
-			if bulb := cfg.probeBulb(conn, targetIP); bulb != nil {
+			if bulb := probeBulb(conn, targetIP); bulb != nil {
 				mu.Lock()
 				bulbs[bulb.Mac] = bulb
 				mu.Unlock()
@@ -156,11 +155,11 @@ func (cfg *config.Config) scanSubnetForBulbs(conn *net.UDPConn, subnet string) m
 	}
 
 	wg.Wait()
-	cfg.logger.Info(fmt.Sprintf("Scan complete. Found %d bulbs", len(bulbs)))
+	logger.Info(fmt.Sprintf("Scan complete. Found %d bulbs", len(bulbs)))
 	return bulbs
 }
 
-func (cfg *config.Config) probeBulb(conn *net.UDPConn, ip string) *wiz.Bulb {
+func probeBulb(conn *net.UDPConn, ip string) *Bulb {
 	targetAddr := &net.UDPAddr{
 		IP:   net.ParseIP(ip),
 		Port: 38899,
@@ -189,7 +188,7 @@ func (cfg *config.Config) probeBulb(conn *net.UDPConn, ip string) *wiz.Bulb {
 		return nil
 	}
 
-	return &wiz.Bulb{
+	return &Bulb{
 		Ip:   remoteAddr.IP,
 		Name: "WizBulb",
 		Mac:  params.Result.Mac,

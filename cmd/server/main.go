@@ -1,27 +1,23 @@
 package main
 
 import (
-	"embed"
 	"fmt"
 	"io/fs"
 	"log"
 	"net/http"
 
+	"github.com/AradD7/lightarr/frontend"
 	"github.com/AradD7/lightarr/internal/config"
+	"github.com/AradD7/lightarr/internal/handlers"
+	"github.com/AradD7/lightarr/sql"
 	"github.com/pressly/goose/v3"
 	_ "modernc.org/sqlite"
 )
 
-//go:embed sql/schema/*.sql
-var embedMigrations embed.FS
-
-//go:embed frontend/dist
-var embedStatics embed.FS
-
 func main() {
-	config := config.LoadConfig()
+	app := handlers.LoadApp()
 
-	goose.SetBaseFS(embedMigrations)
+	goose.SetBaseFS(sql.EmbedMigrations)
 	if err := goose.SetDialect("sqlite"); err != nil {
 		log.Fatalf("Failed to load migrations: %v", err)
 	}
@@ -30,7 +26,7 @@ func main() {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}
 
-	frontend, err := fs.Sub(embedStatics, "frontend/dist")
+	frontend, err := fs.Sub(frontend.EmbedStatics, "frontend/dist")
 	if err != nil {
 		log.Fatalf("Failed to load frontend: %v", err.Error())
 	}

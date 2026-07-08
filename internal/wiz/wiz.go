@@ -2,47 +2,21 @@ package wiz
 
 import (
 	"encoding/json"
+	"fmt"
+	"log/slog"
 	"net"
 	"time"
 )
 
-type Bulb struct {
-	Ip 	 		net.IP 		 `json:"ip"`
-	Name 		string 		 `json:"name"`
-	Mac  		string 		 `json:"mac"`
-	Addr 		*net.UDPAddr `json:"-"`
-	IsReachable bool 		 `json:"isReachable"`
-	Type 		string 		 `json:"type"`
-}
-
-type Color struct {
-	R, G, B int
-}
-
-type WizCommand struct {
-	Method string 	 `json:"method"`
-	Params WizParams `json:"params"`
-}
-
-type WizParams struct {
-	State 	*bool `json:"state,omitempty"`
-	Dimming *int  `json:"dimming,omitempty"`
-	R 		*int  `json:"r,omitempty"`
-	G 		*int  `json:"g,omitempty"`
-	B 		*int  `json:"b,omitempty"`
-	Temp 	*int  `json:"temp,omitempty"`
-	SceneId *int  `json:"sceneId,omitempty"`
-}
-
 func (b *Bulb) drainBuffer(conn *net.UDPConn) {
-    conn.SetReadDeadline(time.Now().Add(10 * time.Millisecond))
-    buf := make([]byte, 1024)
-    for {
-        _, _, err := conn.ReadFromUDP(buf)
-        if err != nil {
-            break
-        }
-    }
+	conn.SetReadDeadline(time.Now().Add(10 * time.Millisecond))
+	buf := make([]byte, 1024)
+	for {
+		_, _, err := conn.ReadFromUDP(buf)
+		if err != nil {
+			break
+		}
+	}
 }
 
 func (b *Bulb) Flash(conn *net.UDPConn) {
@@ -120,4 +94,26 @@ func (w *WizCommand) TurnOn() {
 
 func (w *WizCommand) SetTemp(temp int) {
 	w.Params.Temp = &temp
+}
+
+func getBulbByBulbMac(bulbsMap map[string]*Bulb, bulbMac string) *Bulb {
+	for _, bulb := range bulbsMap {
+		if bulb.Mac == bulbMac {
+			return bulb
+		}
+	}
+	return nil
+}
+
+func ExecuteActions(bulbsMap map[string]*Bulb, actions []WizAction, conn *net.UDPConn, logger *slog.Logger) {
+	for _, action := range actions {
+		for _, mac := range action.BulbsMac {
+			bulb := getBulbByBulbMac(bulbsMap, mac)
+			if bulb != nil {
+				bulb.Execute(conn, action.Command)
+			} else {
+				logger.Info(fmt.Sprintf("Failed to find a bulb with id %s", mac))
+			}
+		}
+	}
 }
