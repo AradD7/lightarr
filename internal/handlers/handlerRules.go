@@ -10,11 +10,11 @@ import (
 	"github.com/AradD7/lightarr/internal/rules"
 )
 
-func (app *App) handlerGetAllRules(w http.ResponseWriter, r *http.Request) {
+func (app *App) HandlerGetAllRules(w http.ResponseWriter, r *http.Request) {
 	app.respondWithJSON(w, http.StatusOK, app.Rules)
 }
 
-func (app *App) handlerAddRule(w http.ResponseWriter, r *http.Request) {
+func (app *App) HandlerAddRule(w http.ResponseWriter, r *http.Request) {
 	var rule rules.Rule
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&rule); err != nil {
@@ -52,7 +52,7 @@ func (app *App) handlerAddRule(w http.ResponseWriter, r *http.Request) {
 	app.respondWithJSON(w, http.StatusOK, "Rule Added!")
 }
 
-func (app *App) handlerDeleteRule(w http.ResponseWriter, r *http.Request) {
+func (app *App) HandlerDeleteRule(w http.ResponseWriter, r *http.Request) {
 	ruleId := r.PathValue("ruleId")
 	var err error
 	app.Rules, err = rules.DeleteRule(app.Rules, ruleId, app.Db)
@@ -64,7 +64,7 @@ func (app *App) handlerDeleteRule(w http.ResponseWriter, r *http.Request) {
 	app.respondWithJSON(w, http.StatusOK, "Deleted!")
 }
 
-func (app *App) handlerUpdateRuleName(w http.ResponseWriter, r *http.Request) {
+func (app *App) HandlerUpdateRuleName(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Id   string `json:"id"`
 		Name string `json:"name"`

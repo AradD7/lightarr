@@ -12,7 +12,7 @@ import (
 	"github.com/AradD7/lightarr/internal/plex"
 )
 
-func (app *App) handlerGetAllAccounts(w http.ResponseWriter, r *http.Request) {
+func (app *App) HandlerGetAllAccounts(w http.ResponseWriter, r *http.Request) {
 	accounts, err := app.Db.GetAllAccounts(r.Context())
 	if err != nil {
 		app.respondWithError(w, http.StatusInternalServerError, "Failed to get accounts from database", err)
@@ -29,7 +29,7 @@ func (app *App) handlerGetAllAccounts(w http.ResponseWriter, r *http.Request) {
 	app.respondWithJSON(w, http.StatusOK, resp)
 }
 
-func (app *App) handlerGetAllDevices(w http.ResponseWriter, r *http.Request) {
+func (app *App) HandlerGetAllDevices(w http.ResponseWriter, r *http.Request) {
 	players, err := app.Db.GetAllDevices(r.Context())
 	if err != nil {
 		app.respondWithError(w, http.StatusInternalServerError, "Failed to get players from database", err)
@@ -46,7 +46,7 @@ func (app *App) handlerGetAllDevices(w http.ResponseWriter, r *http.Request) {
 	app.respondWithJSON(w, http.StatusOK, resp)
 }
 
-func (app *App) handlerAddAccount(w http.ResponseWriter, r *http.Request) {
+func (app *App) HandlerAddAccount(w http.ResponseWriter, r *http.Request) {
 	var account plex.PlexAccount
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&account); err != nil {
@@ -68,7 +68,7 @@ func (app *App) handlerAddAccount(w http.ResponseWriter, r *http.Request) {
 	app.respondWithJSON(w, http.StatusOK, "Account added!")
 }
 
-func (app *App) handlerAddDevice(w http.ResponseWriter, r *http.Request) {
+func (app *App) HandlerAddDevice(w http.ResponseWriter, r *http.Request) {
 	var player plex.PlexDevice
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&player); err != nil {
@@ -87,7 +87,7 @@ func (app *App) handlerAddDevice(w http.ResponseWriter, r *http.Request) {
 	app.respondWithJSON(w, http.StatusOK, "Added device")
 }
 
-func (app *App) handlerDeleteAccount(w http.ResponseWriter, r *http.Request) {
+func (app *App) HandlerDeleteAccount(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("accountId"))
 	if err != nil {
 		app.respondWithError(w, http.StatusBadRequest, "Invalid Id", err)
@@ -100,7 +100,7 @@ func (app *App) handlerDeleteAccount(w http.ResponseWriter, r *http.Request) {
 	app.respondWithJSON(w, http.StatusOK, "Deleted!")
 }
 
-func (app *App) handlerDeleteDevice(w http.ResponseWriter, r *http.Request) {
+func (app *App) HandlerDeleteDevice(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("deviceId")
 	if err := app.Db.DeleteDevice(r.Context(), id); err != nil {
 		app.respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Found no player with %s id", id), err)
@@ -109,7 +109,7 @@ func (app *App) handlerDeleteDevice(w http.ResponseWriter, r *http.Request) {
 	app.respondWithJSON(w, http.StatusOK, "Deleted!")
 }
 
-func (app *App) handlerPlexAllAccounts(w http.ResponseWriter, r *http.Request) {
+func (app *App) HandlerPlexAllAccounts(w http.ResponseWriter, r *http.Request) {
 	req, err := http.NewRequest("GET", "https://clients.plex.tv/api/home/users", nil)
 	if err != nil {
 		app.respondWithError(w, http.StatusInternalServerError, "Failed to create a GET request", err)
@@ -153,7 +153,7 @@ func (app *App) handlerPlexAllAccounts(w http.ResponseWriter, r *http.Request) {
 	app.respondWithJSON(w, http.StatusOK, accounts)
 }
 
-func (app *App) handlerPlexAllDevices(w http.ResponseWriter, r *http.Request) {
+func (app *App) HandlerPlexAllDevices(w http.ResponseWriter, r *http.Request) {
 	req, err := http.NewRequest("GET", "https://clients.plex.tv/api/v2/devices", nil)
 	if err != nil {
 		app.respondWithError(w, http.StatusInternalServerError, "Failed to create a GET request", err)

@@ -1,6 +1,6 @@
-package sql
+package schema
 
 import "embed"
 
-//go:embed schema/*.sql
+//go:embed *.sql
 var EmbedMigrations embed.FS

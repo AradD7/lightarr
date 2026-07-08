@@ -23,7 +23,7 @@ func LoadConfig() Config {
 
 	dbPath := os.Getenv("DB_PATH")
 	if dbPath == "" {
-		dbPath = "./data/lightarr.db"
+		dbPath = "data/lightarr.db"
 	}
 
 	xClientId := os.Getenv("X_PLEX_CLIENT_IDENTIFIER")

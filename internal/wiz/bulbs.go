@@ -19,13 +19,13 @@ type GetPilotParams struct {
 	} `json:"result"`
 }
 
-func LoadBulbs(conn *net.UDPConn, db *database.Queries, logger *slog.Logger) {
+func LoadBulbs(conn *net.UDPConn, db *database.Queries, logger *slog.Logger) map[string]*Bulb {
 	bulbsMap := make(map[string]*Bulb)
 
 	data, err := db.GetAllBulbs(context.Background())
 	if err != nil {
 		logger.Error(fmt.Sprintf("Could not read bulbs from db: %s", err.Error()))
-		return
+		return nil
 	}
 
 	for _, bulb := range data {
@@ -44,7 +44,8 @@ func LoadBulbs(conn *net.UDPConn, db *database.Queries, logger *slog.Logger) {
 		bulbsMap[bulb.Mac] = &currentBulb
 	}
 
-	UpdateBulbs(conn, bulbsMap, db, logger)
+	bulbsMap, _ = UpdateBulbs(conn, bulbsMap, db, logger)
+	return bulbsMap
 }
 
 func UpdateBulbs(conn *net.UDPConn, bulbsMap map[string]*Bulb, db *database.Queries, logger *slog.Logger) (map[string]*Bulb, int) {

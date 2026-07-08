@@ -8,7 +8,7 @@ import (
 	"github.com/AradD7/lightarr/internal/wiz"
 )
 
-func (app *App) handlerGetBulbs(w http.ResponseWriter, r *http.Request) {
+func (app *App) HandlerGetBulbs(w http.ResponseWriter, r *http.Request) {
 	var bulbs []*wiz.Bulb
 	for _, bulb := range app.BulbsMap {
 		bulbs = append(bulbs, bulb)
@@ -16,7 +16,7 @@ func (app *App) handlerGetBulbs(w http.ResponseWriter, r *http.Request) {
 	app.respondWithJSON(w, http.StatusOK, bulbs)
 }
 
-func (app *App) handlerUpdateBulbName(w http.ResponseWriter, r *http.Request) {
+func (app *App) HandlerUpdateBulbName(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Mac  string `json:"mac"`
 		Name string `json:"name"`
@@ -41,7 +41,7 @@ func (app *App) handlerUpdateBulbName(w http.ResponseWriter, r *http.Request) {
 	app.respondWithJSON(w, http.StatusOK, "Updated!")
 }
 
-func (app *App) handlerFlashBulb(w http.ResponseWriter, r *http.Request) {
+func (app *App) HandlerFlashBulb(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Mac string `json:"mac"`
 	}
@@ -62,7 +62,7 @@ func (app *App) handlerFlashBulb(w http.ResponseWriter, r *http.Request) {
 	go bulb.Flash(app.Conn)
 }
 
-func (app *App) handlerRefreshBulbs(w http.ResponseWriter, r *http.Request) {
+func (app *App) HandlerRefreshBulbs(w http.ResponseWriter, r *http.Request) {
 	type Resp struct {
 		NumNewBulbs int `json:"num"`
 	}
@@ -72,7 +72,7 @@ func (app *App) handlerRefreshBulbs(w http.ResponseWriter, r *http.Request) {
 	app.respondWithJSON(w, http.StatusOK, resp)
 }
 
-func (app *App) handlerUpdateBulbType(w http.ResponseWriter, r *http.Request) {
+func (app *App) HandlerUpdateBulbType(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Mac  string `json:"mac"`
 		Type string `json:"type"`

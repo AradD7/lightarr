@@ -10,7 +10,7 @@ import (
 	"github.com/AradD7/lightarr/internal/wiz"
 )
 
-func (app *App) handlerPlexWebhook(w http.ResponseWriter, r *http.Request) {
+func (app *App) HandlerPlexWebhook(w http.ResponseWriter, r *http.Request) {
 	app.Logger.Debug("Recieved Plex Payload")
 	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
